@@ -1,0 +1,340 @@
+/* 画面全体の色・文字・部品の基準。部品の色はここで決めた変数だけから取る。 */
+
+:root {
+  color-scheme: light;
+  --ground: #eef2f5;
+  --surface: #ffffff;
+  --surface-2: #f5f7f9;
+  --ink: #17222c;
+  --muted: #566573;
+  --faint: #8d99a5;
+  --line: #d7dee5;
+  /* 主色は緑青。長い時間見る画面なので彩度を抑える。 */
+  --accent: #1f6b66;
+  --accent-hover: #185a56;
+  --accent-pressed: #124844;
+  --accent-soft: #e2efed;
+  --accent-ink: #ffffff;
+  /* 処理の状態の色。色だけで伝えず、必ず文字と並べる。 */
+  --status-running: #c38a0e;
+  --status-done: #2e8a57;
+  --status-failed: #c2432f;
+  --status-pending: #3b73bf;
+  --status-idle: #8d99a5;
+  --hit-soft: #fbebc0;
+  --hit-ink: #5e4500;
+  --danger: #b3261e;
+  --danger-soft: #fbe3e1;
+  --canvas: #fafbfc;
+  --grid: #e6eaef;
+  /* 図のエッジの色。観測は細い淡色、候補は橙、不確定の連鎖は紫で分ける。 */
+  --edge-observed: #7d8896;
+  --edge-candidate: #d97706;
+  --edge-uncertain: #c026d3;
+  /* ノードの種別の色。背景との対比 3:1 以上で、1 型・2 型の色覚でも色差を保つ組を選んだ。 */
+  --kind-terminal: #0570bb;
+  --kind-process: #a54e13;
+  --kind-file: #059b5e;
+  --kind-registry_value: #420cac;
+  --kind-account: #b10551;
+  --kind-ip: #2a9aab;
+  --kind-domain: #a67a09;
+  --kind-record: #6b7280;
+  --shadow: 0 1px 2px rgb(23 32 43 / 6%), 0 8px 24px rgb(23 32 43 / 8%);
+  --radius: 8px;
+  /*
+   * button・入力欄・select・chip の高さ。同じ行に並べたときに上下の端をそろえる。
+   * 24px は押せる範囲の下限 (WCAG 2.2 の 2.5.8) と同じ値である。
+   */
+  --control-height: 24px;
+  /*
+   * ヘッダ・dock のタブの帯・区画の上端の toolbar の高さ。部品の上下に 4px ずつの余白と、
+   * 下端の 1px の線を置く。4px は focus の輪郭 (幅 2px、間隔 2px) が帯の中に収まる幅である。
+   */
+  --bar-height: calc(var(--control-height) + 9px);
+  --sans:
+    "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI",
+    "Meiryo", system-ui, sans-serif;
+  --mono:
+    "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo,
+    Consolas, monospace;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0f141a;
+  --surface: #171d25;
+  --surface-2: #1d2530;
+  --ink: #e3e8ee;
+  --muted: #97a3b2;
+  --faint: #6d7988;
+  --line: #2a3441;
+  --accent: #63bdb4;
+  --accent-hover: #7fcbc3;
+  --accent-pressed: #9dd8d1;
+  --accent-soft: #173634;
+  --accent-ink: #0a1d1b;
+  --status-running: #e6b33a;
+  --status-done: #5cc48a;
+  --status-failed: #f2877f;
+  --status-pending: #7fa8e6;
+  --status-idle: #6d7988;
+  --hit-soft: #3a3017;
+  --hit-ink: #f6de9a;
+  --danger: #f2877f;
+  --danger-soft: #3a1c1a;
+  --canvas: #131920;
+  --grid: #1e2630;
+  --edge-observed: #4f5b6a;
+  --edge-candidate: #f0a33a;
+  --edge-uncertain: #e879f9;
+  --kind-terminal: #879cf5;
+  --kind-process: #f7693e;
+  --kind-file: #9ff0bd;
+  --kind-registry_value: #9236ec;
+  --kind-account: #f42679;
+  --kind-ip: #6ce6f9;
+  --kind-domain: #efec40;
+  --kind-record: #9aa4b2;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 35%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  text-wrap: balance;
+  line-height: 1.35;
+}
+
+h2 {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* 区画の中の見出しは h3 と h4 と表の caption を同じ 1 組 (14px、600) にする。 */
+h3,
+h4 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/*
+ * shared/ui の Button (md) と同じ高さ・文字・角にする。button は中身を上下の中央に置くため、
+ * 上下の余白を置かずに高さの下限だけを決める。文字列が折り返す button は下限より高くなる。
+ */
+button {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  min-height: var(--control-height);
+  padding: 0 12px;
+  cursor: pointer;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+button.primary,
+button[type="submit"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+
+button.primary:hover:not(:disabled),
+button[type="submit"]:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 3px 8px;
+  max-width: 100%;
+}
+
+/*
+ * 1 行の入力欄と select は button と同じ高さにする。文字は欄の中で上下の中央に置かれる。
+ * 文と並べたときは行の中央にそろえ、行の高さを部品の高さより大きくしない。
+ */
+input,
+select {
+  height: var(--control-height);
+  padding-block: 0;
+  vertical-align: middle;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  height: auto;
+  padding: 0;
+  margin-right: 4px;
+  accent-color: var(--accent);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--faint);
+}
+
+label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+table {
+  border-collapse: collapse;
+  font-size: 12.5px;
+  width: 100%;
+}
+
+caption {
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  padding-block: 4px 6px;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+/*
+ * 見出しの行をスクロールする枠の上端に留める。表を包む要素に横のスクロールを持たせると上端に
+ * 留まらなくなるため、横のスクロールはビューの枠が持つ。collapse の表は留めた見出しの下の線を
+ * 描かないため、線を影で描く。
+ */
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface);
+  box-shadow: inset 0 -1px 0 var(--line);
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* 行の操作の列の見出しは、上端と左端の両方に留まるため、ほかの見出しと列の上に描く。 */
+thead th.row-actions {
+  z-index: 3;
+}
+
+tbody th {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+ul,
+ol {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+details > summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  padding-block: 4px;
+}
+
+details > summary:hover {
+  color: var(--ink);
+}
+
+details[open] > summary {
+  margin-bottom: 6px;
+}
+
+[role="alert"] {
+  border: 1px solid var(--danger);
+  background: var(--danger-soft);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+}
+
+pre,
+code,
+kbd {
+  font-family: var(--mono);
+}
+
+/* 原資料由来の文字列の枠。連続した空白を詰めずに描き、折り返しは置かれた場所の指定に従う。 */
+.raw-text {
+  white-space-collapse: preserve;
+}
+
+/* 原資料の制御文字と書式文字を置き換えた `U+XXXX` の符号。枠と色で原文の文字と見分ける。 */
+.raw-control-code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  color: var(--hit-ink);
+  background: var(--hit-soft);
+  border: 1px solid currentcolor;
+  border-radius: 3px;
+  padding-inline: 2px;
+  margin-inline: 1px;
+}

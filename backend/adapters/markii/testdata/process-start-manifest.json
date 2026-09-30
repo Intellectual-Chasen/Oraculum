@@ -1,0 +1,146 @@
+{
+  "description": "プロセス開始の解析の期待値。値は手作業で確定した。実装の出力を転記していない。",
+  "origin": {
+    "note": "合成した行だけを持つ。ORACULUM_MARKII_SOURCE_DIR が指す入力の検査は、opt-in の検査が行う。"
+  },
+  "requiredKeys": {
+    "note": "欠けたレコードから観測を作らず、stage が field_map の失敗を返す key。",
+    "keys": ["sn", "evt", "subEvt", "psGUID", "tmid", "com", "csid", "psPath"],
+    "reason": {
+      "sn": "RecordLocator の sequenceNumber の材料。positionKind が sequence_number のとき必須",
+      "evt": "ObservationKind の raw の 2 要素の 1 つ",
+      "subEvt": "ObservationKind の raw の 2 要素の 1 つ",
+      "psGUID": "ProcessRef の processId の材料",
+      "tmid": "ProcessRef の terminalId の材料",
+      "com": "端末の識別の材料",
+      "csid": "端末の識別の材料",
+      "psPath": "プロセスの実行 file の path"
+    }
+  },
+  "optionalKeys": {
+    "note": "欠けても観測を作る key。",
+    "absenceForm": "parentGUID だけが ParentGuid の欄を持ち、欠けたときの valueState は item_absent になる。他の省略可の key は、欠けたレコードの Fields に要素を持たない。出ない key の欄を作らない。",
+    "keys": ["parentGUID", "parentPath", "psUser", "psDomain", "cmd", "psID", "sessionID"]
+  },
+  "repeatedKeys": {
+    "note": "同じ key が 1 レコードに 2 回以上出る形の扱い。",
+    "required": "field_map の失敗にする。先勝ちで採ると、どちらの文字列を根拠にしたかが応答から消える。",
+    "optional": "Fields に原文の並び順で 1 件ずつ置く。2 つ目の値を捨てない。"
+  },
+  "records": [
+    {
+      "name": "processStartLine",
+      "source": "合成",
+      "form": "必須の 8 key をすべて持つ正常な行。引用符付きと引用符無しの value、値が 0 の欄、親への参照を持つ",
+      "isProcessStart": true,
+      "sequenceNumber": 900200,
+      "lineNumber": 1,
+      "processGuid": "{00000000-1111-2222-3333-555555555555}",
+      "terminalId": "00000000-1111-2222-3333-444444444444",
+      "parentGuid": {
+        "rawText": "{00000000-1111-2222-3333-666666666666}",
+        "valueState": "present",
+        "normalized": null
+      },
+      "startTime": {
+        "rawText": "02/01/2000 13:20:00.500 +0900",
+        "normalized": "2000-02-01T13:20:00.500+09:00",
+        "normalizedForm": "rfc3339_absolute",
+        "precision": "millisecond",
+        "offsetState": "in_value",
+        "offsetText": "+0900",
+        "clock": "terminal_local",
+        "meaning": "event",
+        "valueState": "present",
+        "instantUTC": "2000-02-01T04:20:00.500Z"
+      },
+      "observationKind": {
+        "rawElementCount": 2,
+        "names": ["evt", "subEvt"],
+        "values": ["ps", "start"],
+        "status": "determined"
+      },
+      "fields": {
+        "psPath": {
+          "rawText": "\"C:\\Windows\\system32\\notepad.exe\"",
+          "normalized": "C:\\Windows\\system32\\notepad.exe",
+          "valueState": "present",
+          "note": "引用符付きの value は正規化値と導き方を持つ"
+        },
+        "sessionID": {
+          "rawText": "0",
+          "normalized": null,
+          "valueState": "present",
+          "note": "値が 0 の欄。欄が無い状態と別の形にする"
+        },
+        "cmd": {
+          "rawText": "\"notepad.exe \"\"C:\\work\\note.txt\"\"\"",
+          "normalized": "notepad.exe \"C:\\work\\note.txt\"",
+          "valueState": "present",
+          "note": "引用符 2 個は 1 個へ復号する"
+        }
+      }
+    },
+    {
+      "name": "processStartWithoutPathLine",
+      "source": "合成",
+      "form": "必須の psPath を欠く",
+      "isProcessStart": true,
+      "failure": {
+        "stage": "field_map",
+        "diagnosisClass": "undetermined",
+        "lineNumber": 1,
+        "expectedMeaningMentions": "psPath"
+      }
+    },
+    {
+      "name": "processStartWithoutParentLine",
+      "source": "合成",
+      "form": "省略可の parentGUID を欠く。必須の 8 key はすべて持つ",
+      "isProcessStart": true,
+      "sequenceNumber": 900202,
+      "parentGuid": { "valueState": "item_absent", "rawText": null }
+    },
+    {
+      "name": "processStartWithBadSequenceLine",
+      "source": "合成",
+      "form": "sn の value が 10 進整数でない",
+      "isProcessStart": true,
+      "failure": {
+        "stage": "field_map",
+        "diagnosisClass": "undetermined",
+        "sequenceNumberIsNil": true,
+        "note": "sn を読めない失敗に sequenceNumber の代用の値を入れない"
+      }
+    },
+    {
+      "name": "processStartWithBadHeaderTimeLine",
+      "source": "合成",
+      "form": "ヘッダーの日時が日時として解釈できない",
+      "isProcessStart": true,
+      "failure": {
+        "stage": "normalize",
+        "diagnosisClass": "undetermined",
+        "sequenceNumber": 900204,
+        "note": "sn は読めているので失敗に載せる"
+      }
+    },
+    {
+      "name": "processStartWithRepeatedKeyLine",
+      "source": "合成",
+      "form": "必須の psGUID が 1 レコードに 2 回出る",
+      "isProcessStart": true,
+      "failure": {
+        "stage": "field_map",
+        "diagnosisClass": "undetermined",
+        "note": "先勝ちで通知せずに採らない。どちらの文字列を根拠にしたかが応答から消える"
+      }
+    },
+    {
+      "name": "processStopLine / communicationLine / processStartWithoutEventLine",
+      "source": "合成",
+      "form": "他の種別の行",
+      "isProcessStart": false
+    }
+  ]
+}

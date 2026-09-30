@@ -1,0 +1,5 @@
+[
+  {"file":"full.log","format":"squid_combined","state":"published_full","read":1,"succeeded":1,"failed":0,"summary":"full.log published_full read=1 succeeded=1 failed=0\n"},
+  {"file":"partial.log","format":"squid_combined","state":"published_partial","read":2,"succeeded":1,"failed":1,"summary":"partial.log published_partial read=2 succeeded=1 failed=1\n"},
+  {"file":"withheld.log","format":"infotrace_mark_ii","state":"withheld","read":2,"succeeded":2,"failed":0,"summary":"withheld.log withheld read=2 succeeded=2 failed=0\n"}
+]

@@ -1,0 +1,174 @@
+{
+  "note": "`/api/v0/graph` と `/api/v0/nodes/{id}` と `/api/v0/edges/{id}` の期待値。値は 2 つの fixture の byte 列から手作業で確定した。実装の出力を転記していない。",
+  "orderNote": "nodes と edges の並びは、収集元の取り込みの入力順と、同じ収集元の中のレコードの走査順である。graph-markii.log を読み切った後に graph-squid.log を読む。1 レコードが参照だけで指したノードは、そのレコードが記録した対象のノードの後に並ぶ。関連付けが挙げた候補のエッジは、観測から直接作ったエッジをすべて並べた後に付く。",
+  "labelNote": "label は語彙の役割が label の項目の値である。file は file.name の欄を持たないため、file.path の末尾の要素から導いた値になり valueState が derived になる。ip と domain は識別鍵の値が表示名である。参照だけで指したプロセスの表示名は parent_process.binary_path の値であり、その欄を持たないレコードが参照したプロセスは item_absent になる。",
+  "axisNote": "observation はそのノードを対象として記録したレコードが 1 件以上あるかを表し、creationRecord は生成を記録したレコード (ps/start) があるかを表す。2 つは別の軸である。{P8} は通信のレコードだけが記録したプロセスで observed かつ creationRecord が absent、{P5} は先に子の起動のレコードが参照し後で自分の起動のレコードが来るプロセスで observed かつ present、{P1} は先に自分の起動のレコードがあり後で子が参照するプロセスで observed かつ present である。生成を記録した根拠を持てない種別は item_absent を持つ。",
+  "sources": [
+    {
+      "file": "graph-markii.log",
+      "format": "infotrace_mark_ii",
+      "state": "published_full"
+    },
+    {
+      "file": "graph-squid.log",
+      "format": "squid_combined",
+      "state": "published_full"
+    }
+  ],
+  "recordNodesNote": "レコードのノードは原文の 1 行につき 1 つある。識別鍵は収集元の内容の識別 (fixture の byte 列の sha256) と位置の指し方と位置の値の組で、表示名は収集元の file 名と位置を `:` で繋いだ導出値である。markii 形式の位置は原文の sn、Squid の位置は行番号である。nodes の並びでは、各レコードのノードがそのレコードが指す対象の後に入る。",
+  "recordNodes": [
+    {"file": "graph-markii.log", "positionKind": "sequence_number",
+     "positions": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]},
+    {"file": "graph-squid.log", "positionKind": "line_number",
+     "positions": [1, 2, 3, 4, 5]}
+  ],
+  "nodes": [
+    {"kind": "terminal", "keyForm": "terminal_id", "identity": ["T1"], "label": "PC01", "labelState": "present", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "process", "keyForm": "terminal_id_process_id", "identity": ["T1", "{P1}"], "label": "C:\\app.exe", "labelState": "present", "observation": "observed", "creationRecord":"present"},
+    {"kind": "account", "keyForm": "account_domain_name", "identity": ["AD", "alice"], "label": "alice", "labelState": "derived", "observation": "observed", "creationRecord":"absent"},
+    {"kind": "ip", "keyForm": "address", "identity": ["192.0.2.1"], "label": "192.0.2.1", "labelState": "present", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "process", "keyForm": "terminal_id_process_id", "identity": ["T1", "{P0}"], "label": "C:\\parent.exe", "labelState": "present", "observation": "referenced", "creationRecord":"absent"},
+    {"kind": "file", "keyForm": "terminal_id_file_path", "identity": ["T1", "c:\\app.exe"], "label": "C:\\app.exe", "labelState": "present", "observation": "referenced", "creationRecord":"item_absent"},
+    {"kind": "file", "keyForm": "terminal_id_file_path", "identity": ["T1", "c:\\data\\secret.txt"], "label": "secret.txt", "labelState": "derived", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "file", "keyForm": "terminal_id_file_path", "identity": ["T1", "e:\\secret.txt"], "label": "secret.txt", "labelState": "derived", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "registry_value", "keyForm": "terminal_id_registry_value_key_path", "identity": ["T1", "HKLM\\Software\\Run"], "label": "Startup", "labelState": "present", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "ip", "keyForm": "address", "identity": ["198.51.100.7"], "label": "198.51.100.7", "labelState": "present", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "account", "keyForm": "account_domain_name", "identity": ["AD", "mallory"], "label": "mallory", "labelState": "derived", "observation": "observed", "creationRecord":"absent"},
+    {"kind": "terminal", "keyForm": "terminal_id", "identity": ["T2"], "label": "PC01", "labelState": "present", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "process", "keyForm": "terminal_id_process_id", "identity": ["T2", "{P2}"], "label": "C:\\app.exe", "labelState": "present", "observation": "observed", "creationRecord":"present"},
+    {"kind": "ip", "keyForm": "address", "identity": ["192.0.2.9"], "label": "192.0.2.9", "labelState": "present", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "process", "keyForm": "terminal_id_process_id", "identity": ["T2", "{P0}"], "label": "", "labelState": "item_absent", "observation": "referenced", "creationRecord":"absent"},
+    {"kind": "file", "keyForm": "terminal_id_file_path", "identity": ["T2", "c:\\app.exe"], "label": "C:\\app.exe", "labelState": "present", "observation": "referenced", "creationRecord":"item_absent"},
+    {"kind": "file", "keyForm": "terminal_id_file_path", "identity": ["T1", "c:\\data\\new.txt"], "label": "new.txt", "labelState": "derived", "observation": "observed", "creationRecord":"item_absent"},
+    {"kind": "process", "keyForm": "terminal_id_process_id", "identity": ["T1", "{P6}"], "label": "C:\\child6.exe", "labelState": "present", "observation": "observed", "creationRecord":"present"},
+    {"kind": "process", "keyForm": "terminal_id_process_id", "identity": ["T1", "{P5}"], "label": "C:\\late.exe", "labelState": "present", "observation": "observed", "creationRecord":"present"},
+    {"kind": "file", "keyForm": "terminal_id_file_path", "identity": ["T1", "c:\\child6.exe"], "label": "C:\\child6.exe", "labelState": "present", "observation": "referenced", "creationRecord":"item_absent"},
+    {"kind": "file", "keyForm": "terminal_id_file_path", "identity": ["T1", "c:\\late.exe"], "label": "C:\\late.exe", "labelState": "present", "observation": "referenced", "creationRecord":"item_absent"},
+    {"kind": "process", "keyForm": "terminal_id_process_id", "identity": ["T1", "{P7}"], "label": "C:\\child7.exe", "labelState": "present", "observation": "observed", "creationRecord":"present"},
+    {"kind": "file", "keyForm": "terminal_id_file_path", "identity": ["T1", "c:\\child7.exe"], "label": "C:\\child7.exe", "labelState": "present", "observation": "referenced", "creationRecord":"item_absent"},
+    {"kind": "process", "keyForm": "terminal_id_process_id", "identity": ["T1", "{P8}"], "label": "C:\\net8.exe", "labelState": "present", "observation": "observed", "creationRecord":"absent"},
+    {"kind": "domain", "keyForm": "hostname", "identity": ["example.test"], "label": "example.test", "labelState": "derived", "observation": "observed", "creationRecord":"item_absent"}
+  ],
+  "edges": [
+    {"kind": "terminal_address", "state": "observed", "source": 0, "target": 3, "evidenceCount": 15},
+    {"kind": "terminal_account", "state": "observed", "source": 0, "target": 2, "evidenceCount": 1},
+    {"kind": "ran_on", "state": "observed", "source": 1, "target": 0, "evidenceCount": 9},
+    {"kind": "process_parent_child", "state": "observed", "source": 4, "target": 1, "evidenceCount": 1},
+    {"kind": "process_executable", "state": "observed", "source": 5, "target": 1, "evidenceCount": 1},
+    {"kind": "file_operation", "state": "observed", "source": 1, "target": 6, "evidenceCount": 2},
+    {"kind": "file_copy", "state": "observed", "source": 6, "target": 7, "evidenceCount": 1},
+    {"kind": "registry_operation", "state": "observed", "source": 1, "target": 8, "evidenceCount": 1},
+    {"kind": "process_communication", "state": "observed", "source": 1, "target": 9, "evidenceCount": 4},
+    {"kind": "terminal_account", "state": "observed", "source": 0, "target": 10, "evidenceCount": 1},
+    {"kind": "terminal_address", "state": "observed", "source": 11, "target": 13, "evidenceCount": 1},
+    {"kind": "ran_on", "state": "observed", "source": 12, "target": 11, "evidenceCount": 1},
+    {"kind": "process_parent_child", "state": "observed", "source": 14, "target": 12, "evidenceCount": 1},
+    {"kind": "process_executable", "state": "observed", "source": 15, "target": 12, "evidenceCount": 1},
+    {"kind": "file_operation", "state": "observed", "source": 1, "target": 16, "evidenceCount": 1},
+    {"kind": "ran_on", "state": "observed", "source": 17, "target": 0, "evidenceCount": 1},
+    {"kind": "process_parent_child", "state": "observed", "source": 18, "target": 17, "evidenceCount": 1},
+    {"kind": "process_executable", "state": "observed", "source": 19, "target": 17, "evidenceCount": 1},
+    {"kind": "ran_on", "state": "observed", "source": 18, "target": 0, "evidenceCount": 1},
+    {"kind": "process_executable", "state": "observed", "source": 20, "target": 18, "evidenceCount": 1},
+    {"kind": "ran_on", "state": "observed", "source": 21, "target": 0, "evidenceCount": 1},
+    {"kind": "process_parent_child", "state": "observed", "source": 1, "target": 21, "evidenceCount": 1},
+    {"kind": "process_executable", "state": "observed", "source": 22, "target": 21, "evidenceCount": 1},
+    {"kind": "ran_on", "state": "observed", "source": 23, "target": 0, "evidenceCount": 2},
+    {"kind": "process_communication", "state": "observed", "source": 23, "target": 9, "evidenceCount": 2},
+    {"kind": "http_request", "state": "observed", "source": 3, "target": 24, "evidenceCount": 1},
+    {"kind": "http_request", "state": "observed", "source": 3, "target": 9, "evidenceCount": 2},
+    {"kind": "http_request", "state": "observed", "source": 13, "target": 9, "evidenceCount": 1},
+    {"kind": "terminal_outbound_connection", "state": "observed", "source": 0, "target": 9, "evidenceCount": 4},
+    {"kind": "cross_source_connection_match", "state": "candidate", "source": 24, "target": 23, "evidenceCount": 2},
+    {"kind": "cross_source_connection_match", "state": "candidate", "source": 9, "target": 1, "evidenceCount": 3}
+  ],
+  "candidateEdge": {
+    "note": "graph-squid.log の 2 行目 (13:00:09 の 198.51.100.7:8080 への要求) を起点にした関連付けが、graph-markii.log の sn=9 (net/con) と sn=10 (net/est) を候補として挙げる。同じ接続先と同じ秒の sn=11 は subEvt が dcon であり、候補として数えるレコードを選ぶ条件の外にある。1 行目の要求先はホスト名であり、その関連付けはホスト名 example.test のノードを起点にする別のエッジになる (edges の候補のエッジの 1 本目)。根拠は起点 1 件と候補 2 件の 3 件で、起点のレコードを 2 回入れない。",
+    "edgeKind": "cross_source_connection_match",
+    "sourceNodeKind": "ip",
+    "matchCount": 2,
+    "evidenceCount": 3,
+    "stageTalliesNote": "段階 1 は接続先 IP と接続先 port と端末の割当で絞り、同じ接続先 198.51.100.7:8080 を記録した sn=9 (net/con) と sn=10 (net/est) を挙げる。sn=11 は subEvt が dcon であり候補として数えるレコードの外にある。段階 2 は同じ秒 13:00:09 で絞り、2 件がどちらも 13:00:09 であるため減らない。2 件はどちらも psGUID が {P1} であり、指すプロセスは 1 つである。",
+    "stageTallies": [
+      {"stageKey": "clock_independent", "memberCount": 2, "distinctProcessCount": 1},
+      {"stageKey": "second_time_matched", "memberCount": 2, "distinctProcessCount": 1}
+    ],
+    "indistinguishableGroupCount": 1,
+    "indistinguishableGroupSize": 2,
+    "matches": [
+      {
+        "originFileName": "graph-squid.log",
+        "originLineNumber": 2,
+        "candidateFileName": "graph-markii.log",
+        "candidateSequenceNumber": 9,
+        "stageKey": "second_time_matched",
+        "usedConditionKeys": ["terminal_ip_assignment", "destination_ip", "destination_port", "second_of_time"],
+        "windowKind": "same_second",
+        "comparisonUnit": "second",
+        "assumptionKeys": ["clock_offset_below_one_second"]
+      },
+      {
+        "originFileName": "graph-squid.log",
+        "originLineNumber": 2,
+        "candidateFileName": "graph-markii.log",
+        "candidateSequenceNumber": 10,
+        "stageKey": "second_time_matched",
+        "usedConditionKeys": ["terminal_ip_assignment", "destination_ip", "destination_port", "second_of_time"],
+        "windowKind": "same_second",
+        "comparisonUnit": "second",
+        "assumptionKeys": ["clock_offset_below_one_second"]
+      }
+    ]
+  },
+  "candidateOrigins": {
+    "outcomesNote": "関連付けの結果の分類の文字列を、数え上げの並び順で全数挙げる。fixture が通らない分類も要素になる。実装が分類を除いた状態と、件数 0 の分類を結果から省いた状態を、この列との食い違いで見つける。分類を足す変更では、この列に 1 行足す。",
+    "outcomes": [
+      "matched",
+      "destination_ip_absent",
+      "destination_port_absent",
+      "no_candidate_record",
+      "candidate_item_unreadable",
+      "terminal_undetermined",
+      "terminal_id_absent",
+      "proxy_address_unknown",
+      "origin_item_unreadable",
+      "candidate_set_failed",
+      "no_candidate_matching_conditions",
+      "no_candidate_in_window",
+      "node_unresolved",
+      "source_declaration_conflict",
+      "no_compared_condition"
+    ],
+    "countsNote": "graph-squid.log の起点を分類ごとに数えた件数。fixture が通る分類だけを名前で挙げる。ここに挙げない分類は件数 0 であり、test が合計の一致でそれを確かめる。同じ接続先の候補があり秒が揃う行は matched になり候補のエッジを足す。要求先がホスト名の 1 行目は接続先 IP を比べず、端末 T1 と接続先 port 80 と秒 13:00:08 が揃う sn=16 (net/con) を候補にして matched になる。要求先が error: で始まり authority を持たない 5 行目は、接続先 IP もホスト名も持たず destination_ip_absent になる。同じ接続先の候補があり秒が揃わない行は no_candidate_in_window になる。接続元が端末 T2 の行は、同じ接続先の候補 (端末 T1) と段階 1 の端末の条件が一致せず no_candidate_matching_conditions になる。",
+    "unreadableCandidateCount": 0,
+    "droppedCandidateCount": 0,
+    "counts": [
+      {"outcome": "matched", "originCount": 2},
+      {"outcome": "destination_ip_absent", "originCount": 1},
+      {"outcome": "no_candidate_matching_conditions", "originCount": 1},
+      {"outcome": "no_candidate_in_window", "originCount": 1}
+    ]
+  },
+  "processDetail": {
+    "note": "識別鍵が T1 と {P1} のプロセスの詳細。attributes の並びは最初に観測した順である。evidence には、子の起動のレコード (sn=14) がこのプロセスを親として参照した 1 件が入る。record_names_object の incoming 10 本は、このプロセスを指した原文の 10 行 (sn=1..5, 8..11 が psGUID、sn=14 が parentGUID) である。",
+    "nodeKind": "process",
+    "nodeIdentity": ["T1", "{P1}"],
+    "evidenceCount": 10,
+    "attributes": [
+      {"semantic": "process.binary_path", "valueCount": 2, "observationCounts": [8, 1]},
+      {"semantic": "parent_process.id", "valueCount": 1, "observationCounts": [1]},
+      {"semantic": "parent_process.binary_path", "valueCount": 1, "observationCounts": [1]}
+    ],
+    "edgeCounts": [
+      {"edgeKind": "ran_on", "direction": "outgoing", "edgeCount": 1, "evidenceCount": 9},
+      {"edgeKind": "file_operation", "direction": "outgoing", "edgeCount": 2, "evidenceCount": 3},
+      {"edgeKind": "registry_operation", "direction": "outgoing", "edgeCount": 1, "evidenceCount": 1},
+      {"edgeKind": "process_communication", "direction": "outgoing", "edgeCount": 1, "evidenceCount": 4},
+      {"edgeKind": "process_parent_child", "direction": "outgoing", "edgeCount": 1, "evidenceCount": 1},
+      {"edgeKind": "process_parent_child", "direction": "incoming", "edgeCount": 1, "evidenceCount": 1},
+      {"edgeKind": "process_executable", "direction": "incoming", "edgeCount": 1, "evidenceCount": 1},
+      {"edgeKind": "record_names_object", "direction": "incoming", "edgeCount": 10, "evidenceCount": 10},
+      {"edgeKind": "cross_source_connection_match", "direction": "incoming", "edgeCount": 1, "evidenceCount": 3}
+    ]
+  }
+}

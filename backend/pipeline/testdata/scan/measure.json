@@ -1,0 +1,11 @@
+[
+  {"name":"empty","input":"","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","size":0,"newlines":0,"endsWithNewline":false,"ending":"undetermined"},
+  {"name":"no_newline","input":"abc","sha256":"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad","size":3,"newlines":0,"endsWithNewline":false,"ending":"undetermined"},
+  {"name":"unterminated","input":"a\nb","sha256":"7e18f737311b2dc3b2f269dd78396b0351f14fb66efa879f768cb23181883c78","size":3,"newlines":1,"endsWithNewline":false,"ending":"lf"},
+  {"name":"lf","input":"a\nb\n","sha256":"911169ddaaf146aff539f58c26c489af3b892dff0fe283c1c264c65ae5aa59a2","size":4,"newlines":2,"endsWithNewline":true,"ending":"lf"},
+  {"name":"crlf","input":"a\r\nb\r\n","sha256":"58055bdcc73787eb88c78d36f0b4939e9c5dc1c3ad17e25cc85a6833cf1a0cab","size":6,"newlines":2,"endsWithNewline":true,"ending":"crlf"},
+  {"name":"mixed","input":"a\r\nb\n","sha256":"953bba9ac9726eaea07e844abcf144a0afe998039257c7a88b6665819597f39d","size":5,"newlines":2,"endsWithNewline":true,"ending":"mixed"},
+  {"name":"bare_cr","input":"a\rb\r","sha256":"95214dcabd7c592744f2ed461262a22b05fc1b2fd6f332bc83d0acf23193f15b","size":4,"newlines":0,"endsWithNewline":false,"ending":"undetermined"},
+  {"name":"empty_lf_record","input":"\n","sha256":"01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b","size":1,"newlines":1,"endsWithNewline":true,"ending":"lf"},
+  {"name":"empty_crlf_record","input":"\r\n","sha256":"7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6","size":2,"newlines":1,"endsWithNewline":true,"ending":"crlf"}
+]

@@ -1,0 +1,24 @@
+id: attack.t1055.process-injection
+title: Process Injection
+description: 観測 graph に明示的な process injection 関係がある候補。
+references:
+  - https://attack.mitre.org/techniques/T1055/
+attack:
+  - id: T1055
+    basis: official
+variants:
+  - id: default
+    rationale: 既存の process injection candidate を graph topology rule として表現する。
+    pattern:
+      nodes:
+        source:
+          kind: process
+        target:
+          kind: process
+      edges:
+        injection:
+          kind: process_injection
+          from: source
+          to: target
+      evidence:
+        required: [injection]

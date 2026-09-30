@@ -1,0 +1,10 @@
+{
+  "parserId":"markii-client-log",
+  "supportedFormatVersion":"V3.0/V3.2",
+  "revision":"test-revision",
+  "settings":"test-settings",
+  "parserVersion":"2a8fccd3db28268200f70cdcf26969866343f6b829c1ae9b1c41f96b2054db0e",
+  "input":"04/05/2024 06:07:08.009 +0000 sn=9 evt=ps subEvt=start\n04/05/2024 06:07:09.009 +0000 sn=10 evt=net subEvt=con\n",
+  "failureCount":2,
+  "provenance":"Synthetic inputs; expected SHA-256 calculated independently with length-prefixed bytes and sha256sum."
+}

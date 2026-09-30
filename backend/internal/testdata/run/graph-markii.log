@@ -1,0 +1,16 @@
+02/01/2000 13:00:00.000 +0900 sn=1 evt=ps subEvt=start psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" parentGUID={P0} parentPath="C:\parent.exe" usr="alice" usrDomain="AD"
+02/01/2000 13:00:01.000 +0900 sn=2 evt=file subEvt=close psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" path="C:\data\secret.txt" read=10 write=0
+02/01/2000 13:00:02.000 +0900 sn=3 evt=file subEvt=copy psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" path="C:\data\secret.txt" dstPath="E:\secret.txt"
+02/01/2000 13:00:03.000 +0900 sn=4 evt=reg subEvt=setVal psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" path="HKLM\Software\Run" entry="Startup" valType=REG_SZ valStr="C:\app.exe"
+02/01/2000 13:00:04.000 +0900 sn=5 evt=net subEvt=con psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" srcIP=192.0.2.1 srcPort=1000 dstIP=198.51.100.7 dstPort=443
+02/01/2000 13:00:05.000 +0900 sn=6 evt=session subEvt=loginRFail tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 usr="mallory" usrDomain="AD"
+02/01/2000 13:00:06.000 +0900 sn=7 evt=ps subEvt=start psGUID={P2} tmid=T2 com="PC01" csid=S-1-5-21-2 ip=192.0.2.9 psPath="C:\app.exe" parentGUID={P0}
+02/01/2000 13:00:07.000 +0900 sn=8 evt=file subEvt=create psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app2.exe" path="C:\data\new.txt"
+02/01/2000 13:00:09.000 +0900 sn=9 evt=net subEvt=con psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" srcIP=192.0.2.1 srcPort=1001 dstIP=198.51.100.7 dstPort=8080
+02/01/2000 13:00:09.000 +0900 sn=10 evt=net subEvt=est psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" srcIP=192.0.2.1 srcPort=1002 dstIP=198.51.100.7 dstPort=8080
+02/01/2000 13:00:09.000 +0900 sn=11 evt=net subEvt=dcon psGUID={P1} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" srcIP=192.0.2.1 srcPort=1003 dstIP=198.51.100.7 dstPort=8080
+02/01/2000 13:00:10.000 +0900 sn=12 evt=ps subEvt=start psGUID={P6} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\child6.exe" parentGUID={P5} parentPath="C:\late.exe"
+02/01/2000 13:00:11.000 +0900 sn=13 evt=ps subEvt=start psGUID={P5} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\late.exe"
+02/01/2000 13:00:12.000 +0900 sn=14 evt=ps subEvt=start psGUID={P7} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\child7.exe" parentGUID={P1} parentPath="C:\app.exe"
+02/01/2000 13:00:13.000 +0900 sn=15 evt=net subEvt=con psGUID={P8} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\net8.exe" srcIP=192.0.2.1 srcPort=1004 dstIP=198.51.100.7 dstPort=443
+02/01/2000 13:00:08.000 +0900 sn=16 evt=net subEvt=con psGUID={P8} tmid=T1 com="PC01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\net8.exe" srcIP=192.0.2.1 srcPort=1005 dstIP=198.51.100.7 dstPort=80

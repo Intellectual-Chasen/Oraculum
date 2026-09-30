@@ -1,0 +1,2 @@
+02/01/2000 13:00:00.000 +0900 sn=1 evt=file subEvt=close psGUID={P1} tmid=T1 com="PC01" path="C:\source.zip" sha256=1e5ac0d1c4f0dbb7b3c1a2e5d6f708192a3b4c5d6e7f80912a3b4c5d6e7f8091
+02/01/2000 13:00:01.000 +0900 sn=2 evt=file subEvt=close psGUID={P1} tmid=T1 com="PC01" path="E:\destination.zip" sha256=1e5ac0d1c4f0dbb7b3c1a2e5d6f708192a3b4c5d6e7f80912a3b4c5d6e7f8091

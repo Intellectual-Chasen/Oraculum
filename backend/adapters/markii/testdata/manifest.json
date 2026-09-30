@@ -1,0 +1,121 @@
+{
+  "description": "文字列の分割の期待値。値は手作業で確定した。実装の出力を転記していない。",
+  "origin": {
+    "note": "合成した行だけを持つ。ORACULUM_MARKII_SOURCE_DIR が指す入力の検査は、opt-in の検査が行う。"
+  },
+  "records": [
+    {
+      "name": "fullShapeLine",
+      "source": "合成",
+      "form": "通信のレコードの文字列構造。逆斜線を含む path、波括弧で囲んだ GUID、読点で連ねた 2 つの IP、コロンで区切った MAC を持つ",
+      "fieldCount": 21,
+      "dateTimeText": "02/01/2000 10:11:12.181",
+      "zoneText": "+0900",
+      "fields": {
+        "sn": { "value": "900100", "quoted": false },
+        "evt": { "value": "net", "quoted": false },
+        "subEvt": { "value": "est", "quoted": false },
+        "com": { "value": "HOST01", "quoted": true },
+        "psPath": { "value": "C:\\Tools\\agent.exe", "quoted": true },
+        "srcIP": { "value": "192.0.2.10", "quoted": false },
+        "dstPort": { "value": "443", "quoted": false }
+      }
+    },
+    {
+      "name": "escapedQuoteLine",
+      "source": "合成",
+      "form": "引用符で囲んだ value の中で引用符を 2 個並べる形。1 つの value の中に 2 度と、value の末尾に 1 度持つ",
+      "fields": {
+        "cmd": {
+          "rawValue": "\"/c \"\"echo hello\"\" done\"",
+          "value": "/c \"echo hello\" done",
+          "quoted": true
+        },
+        "winTitle": {
+          "rawValue": "\"say \"\"hi\"\"\"",
+          "value": "say \"hi\"",
+          "quoted": true
+        }
+      }
+    },
+    {
+      "name": "naiveGrepLine",
+      "source": "合成",
+      "form": "引用符付き value の内側に key=value と同じ字面を 3 つ持つ。素朴な正規表現はこれを key として拾う",
+      "keysInOrder": ["evt", "subEvt", "sn", "cmd", "lv"],
+      "absentKeys": ["group", "enable", "SubSystemType"],
+      "fields": {
+        "cmd": {
+          "value": "netsh advfirewall set group=all enable=yes SubSystemType=Windows",
+          "quoted": true
+        }
+      }
+    },
+    {
+      "name": "absenceLine",
+      "source": "合成",
+      "form": "欠測の 3 通り。値が空の欄、値が \"-\" の欄、key が無い欄",
+      "absentKeys": ["usrDomain"],
+      "fields": {
+        "evtDomain": { "rawValue": "\"\"", "value": "", "quoted": true },
+        "srcCom": { "rawValue": "\"-\"", "value": "-", "quoted": true },
+        "srcIP": { "rawValue": "\"-\"", "value": "-", "quoted": true }
+      }
+    },
+    {
+      "name": "zeroValueLine",
+      "source": "合成",
+      "form": "値が 0 の欄。欄が無い状態と別の形にする",
+      "fields": {
+        "recv": { "value": "0", "quoted": false, "count": 1 },
+        "send": { "value": "1024", "quoted": false, "count": 1 }
+      }
+    },
+    {
+      "name": "orderLineA / orderLineB",
+      "source": "合成",
+      "form": "同じ 4 key を別の並びで持つ 2 行。key の並びを固定と扱わない",
+      "firstKeyOfA": "evt",
+      "firstKeyOfB": "sn",
+      "fields": {
+        "evt": { "value": "file", "quoted": false }
+      }
+    },
+    {
+      "name": "duplicateKeyLine",
+      "source": "合成",
+      "form": "同じ key が 1 レコードに 2 回出る。map の上書きで重複を消さない",
+      "fields": {
+        "lv": { "count": 2, "firstValue": "5" }
+      }
+    },
+    {
+      "name": "quotedSrcIPLine / unquotedSrcIPLine",
+      "source": "合成",
+      "form": "同じ key が引用符付きの形と引用符無しの形の両方で現れる。復号後の値が同じでも引用符の有無を残す",
+      "fields": {
+        "srcIP": { "value": "192.0.2.10", "quotedInFirst": true, "quotedInSecond": false }
+      }
+    }
+  ],
+  "fuzzCorpus": {
+    "note": "fuzz が見つけた 3 つの形。直した後も corpus に残す。",
+    "entries": [
+      {
+        "file": "fuzz/FuzzTokenizeRecord/a9730dd4d5586dae",
+        "form": "ヘッダーと半角空白だけで field が 0 個",
+        "fix": "field が 0 個のレコードを失敗にした"
+      },
+      {
+        "file": "fuzz/FuzzTokenizeRecord/581ec33fe3818eb4",
+        "form": "ヘッダーの 24 文字目が半角空白でない",
+        "fix": "ヘッダーの内部の区切りを検査するようにした"
+      },
+      {
+        "file": "fuzz/FuzzTokenizeRecord/c9a80c26d59e9f62",
+        "form": "末尾が区切りの半角空白で終わる",
+        "fix": "区切りの後に field が続かない形を失敗にした"
+      }
+    ]
+  }
+}

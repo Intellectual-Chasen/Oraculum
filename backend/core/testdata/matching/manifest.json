@@ -1,0 +1,222 @@
+{
+  "description": "関連付けの期待値。値は手作業で確定した。実装の出力を転記していない。",
+  "origin": {
+    "note": "合成した値だけを持つ。段階 1 の候補は 6 件で、関連付けの意味構造を作る 4 件に、時刻の範囲の境界を固定する 2 件 (起点の秒の 1 秒前の sn=900305 と 1 秒後の sn=900312) を足した件数である。",
+    "originRecord": "Squid combined の 1 レコード。接続元 IP に IP から端末への割当を適用した端末、%ru の authority、%ru の scheme から導いた port の 3 つを起点の側の値にする",
+    "originSecond": "2024-03-14T10:20:30+09:00"
+  },
+  "case": {
+    "name": "positive",
+    "form": "段階 1 は端末と接続先 IP と接続先 port の 3 条件で 6 件に絞り、段階 2 は秒単位の時刻を足して 2 件に絞る。接続の終了の観測 1 件と、接続先 port が異なる 1 件は候補に数えない",
+    "records": [
+      {
+        "sequenceNumber": 900305,
+        "subEvt": "est",
+        "dstPort": "80",
+        "psGUID": "{00000000-1111-2222-3333-444444444444}",
+        "headerTimeText": "03/14/2024 10:20:29.870 +0900",
+        "eventTime": "2024-03-14T10:20:29.870+09:00",
+        "countedInClockIndependentStage": true,
+        "countedInSecondTimeMatchedStage": false,
+        "excludedBy": "起点の秒 2024-03-14T10:20:30+09:00 の 1 秒前であり、same_second と半幅 0 の時刻の範囲の外にある"
+      },
+      {
+        "sequenceNumber": 900310,
+        "subEvt": "est",
+        "dstPort": "80",
+        "psGUID": "{00000000-1111-2222-3333-444444444444}",
+        "headerTimeText": "03/14/2024 10:20:30.482 +0900",
+        "eventTime": "2024-03-14T10:20:30.482+09:00",
+        "countedInClockIndependentStage": true,
+        "countedInSecondTimeMatchedStage": true
+      },
+      {
+        "sequenceNumber": 900311,
+        "subEvt": "con",
+        "dstPort": "80",
+        "psGUID": "{00000000-1111-2222-3333-444444444444}",
+        "headerTimeText": "03/14/2024 10:20:30.482 +0900",
+        "eventTime": "2024-03-14T10:20:30.482+09:00",
+        "countedInClockIndependentStage": true,
+        "countedInSecondTimeMatchedStage": true
+      },
+      {
+        "sequenceNumber": 900312,
+        "subEvt": "con",
+        "dstPort": "80",
+        "psGUID": "{00000000-1111-2222-3333-444444444444}",
+        "headerTimeText": "03/14/2024 10:20:31.150 +0900",
+        "eventTime": "2024-03-14T10:20:31.150+09:00",
+        "countedInClockIndependentStage": true,
+        "countedInSecondTimeMatchedStage": false,
+        "excludedBy": "起点の秒 2024-03-14T10:20:30+09:00 の 1 秒後であり、same_second と半幅 0 の時刻の範囲の外にある"
+      },
+      {
+        "sequenceNumber": 900320,
+        "subEvt": "est",
+        "dstPort": "80",
+        "psGUID": "{55555555-6666-7777-8888-999999999999}",
+        "headerTimeText": "03/14/2024 10:40:15.736 +0900",
+        "eventTime": "2024-03-14T10:40:15.736+09:00",
+        "countedInClockIndependentStage": true,
+        "countedInSecondTimeMatchedStage": false
+      },
+      {
+        "sequenceNumber": 900321,
+        "subEvt": "con",
+        "dstPort": "80",
+        "psGUID": "{55555555-6666-7777-8888-999999999999}",
+        "headerTimeText": "03/14/2024 10:40:15.736 +0900",
+        "eventTime": "2024-03-14T10:40:15.736+09:00",
+        "countedInClockIndependentStage": true,
+        "countedInSecondTimeMatchedStage": false
+      },
+      {
+        "sequenceNumber": 900330,
+        "subEvt": "dcon",
+        "dstPort": "80",
+        "psGUID": "{00000000-1111-2222-3333-444444444444}",
+        "headerTimeText": "03/14/2024 10:20:30.482 +0900",
+        "eventTime": "2024-03-14T10:20:30.482+09:00",
+        "countedInClockIndependentStage": false,
+        "countedInSecondTimeMatchedStage": false,
+        "excludedBy": "接続の終了の観測であり、includedObservationKinds が選ぶ 2 件に該当しない"
+      },
+      {
+        "sequenceNumber": 900340,
+        "subEvt": "con",
+        "dstPort": "8080",
+        "psGUID": "{00000000-1111-2222-3333-444444444444}",
+        "headerTimeText": "03/14/2024 10:20:30.482 +0900",
+        "eventTime": "2024-03-14T10:20:30.482+09:00",
+        "countedInClockIndependentStage": false,
+        "countedInSecondTimeMatchedStage": false,
+        "excludedBy": "接続先 port が起点の 80 と一致しない"
+      }
+    ],
+    "stages": [
+      {
+        "stageKey": "clock_independent",
+        "comparisonUnit": "not_compared",
+        "windowKind": "not_compared",
+        "memberCount": 6,
+        "distinctProcessCount": 2,
+        "indistinguishableGroupCount": 1,
+        "largestGroupSize": 6,
+        "undeterminedObservationKindCount": 3,
+        "determinedObservationKindCount": 3,
+        "usedConditionKeys": [
+          "terminal_ip_assignment",
+          "destination_ip",
+          "destination_port"
+        ]
+      },
+      {
+        "stageKey": "second_time_matched",
+        "comparisonUnit": "second",
+        "windowKind": "same_second",
+        "memberCount": 2,
+        "distinctProcessCount": 1,
+        "indistinguishableGroupCount": 1,
+        "largestGroupSize": 2,
+        "usedConditionKeys": [
+          "terminal_ip_assignment",
+          "destination_ip",
+          "destination_port",
+          "second_of_time"
+        ]
+      }
+    ],
+    "windows": [
+      {
+        "name": "same_second は起点の秒だけを取る",
+        "windowKind": "same_second",
+        "centerTime": {
+          "requestText": "10:20:30",
+          "normalized": "2024-03-14T10:20:30+09:00"
+        },
+        "memberSequenceNumbers": [
+          900310,
+          900311
+        ]
+      },
+      {
+        "name": "symmetric_seconds の半幅 0 は起点の秒だけを取る",
+        "windowKind": "symmetric_seconds",
+        "centerTime": {
+          "requestText": "10:20:30",
+          "normalized": "2024-03-14T10:20:30+09:00"
+        },
+        "radiusSeconds": 0,
+        "memberSequenceNumbers": [
+          900310,
+          900311
+        ]
+      },
+      {
+        "name": "symmetric_seconds の半幅 1 は前後 1 秒を取る",
+        "windowKind": "symmetric_seconds",
+        "centerTime": {
+          "requestText": "10:20:30",
+          "normalized": "2024-03-14T10:20:30+09:00"
+        },
+        "radiusSeconds": 1,
+        "memberSequenceNumbers": [
+          900305,
+          900310,
+          900311,
+          900312
+        ]
+      },
+      {
+        "name": "symmetric_seconds の半幅 2 は半幅 1 と同じ件数になる",
+        "windowKind": "symmetric_seconds",
+        "centerTime": {
+          "requestText": "10:20:30",
+          "normalized": "2024-03-14T10:20:30+09:00"
+        },
+        "radiusSeconds": 2,
+        "memberSequenceNumbers": [
+          900305,
+          900310,
+          900311,
+          900312
+        ]
+      },
+      {
+        "name": "second_range の下端が起点の 1 秒前",
+        "windowKind": "second_range",
+        "lowerBound": {
+          "requestText": "10:20:29",
+          "normalized": "2024-03-14T10:20:29+09:00"
+        },
+        "upperBound": {
+          "requestText": "10:20:30",
+          "normalized": "2024-03-14T10:20:30+09:00"
+        },
+        "memberSequenceNumbers": [
+          900305,
+          900310,
+          900311
+        ]
+      },
+      {
+        "name": "second_range の上端が起点の 1 秒後",
+        "windowKind": "second_range",
+        "lowerBound": {
+          "requestText": "10:20:30",
+          "normalized": "2024-03-14T10:20:30+09:00"
+        },
+        "upperBound": {
+          "requestText": "10:20:31",
+          "normalized": "2024-03-14T10:20:31+09:00"
+        },
+        "memberSequenceNumbers": [
+          900310,
+          900311,
+          900312
+        ]
+      }
+    ]
+  }
+}

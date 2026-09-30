@@ -1,0 +1,9 @@
+02/01/2000 13:00:00.000 +0900 sn=101 evt=ps subEvt=start psGUID={S1} tmid=T1 com="HOST01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe"
+02/01/2000 13:00:01.000 +0900 sn=102 evt=ps subEvt=start psGUID={S2} tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 psPath="C:\app.exe"
+02/01/2000 13:00:02.000 +0900 sn=103 evt=session subEvt=loginR tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 usr="alice" usrDomain="AD" srcCom="HOST01" srcIP="192.0.2.1" srcPort="50001"
+02/01/2000 13:00:03.000 +0900 sn=104 evt=session subEvt=loginRFail tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 usr="mallory" usrDomain="AD" srcCom="HOST01" srcIP="192.0.2.1" srcPort="50002"
+02/01/2000 13:00:04.000 +0900 sn=105 evt=net subEvt=con psGUID={S1} tmid=T1 com="HOST01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe" srcIP=192.0.2.1 srcPort=50003 dstIP=198.51.100.7 dstPort=443
+02/01/2000 13:00:05.000 +0900 sn=106 evt=session subEvt=loginR tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 usr="alice" usrDomain="AD" srcCom="-" srcIP="-" srcPort="-"
+02/01/2000 13:00:06.000 +0900 sn=107 evt=session subEvt=loginR tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 usr="alice" usrDomain="AD" srcCom="HOST09" srcIP="203.0.113.5" srcPort="50004"
+02/01/2000 13:00:07.000 +0900 sn=108 evt=os subEvt=evtLog tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 channel="Security" evtID=4769 evtRecID=9001 evtSrc="Microsoft-Windows-Security-Auditing" srcIP="192.0.2.1" srcPort="50005"
+02/01/2000 13:00:08.000 +0900 sn=109 evt=os subEvt=evtLog tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 channel="Security" evtID=4769 evtRecID=9001 evtSrc="Microsoft-Windows-Security-Auditing" srcIP="192.0.2.1" srcPort="50006"

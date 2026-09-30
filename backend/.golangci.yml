@@ -1,0 +1,384 @@
+# golangci-lint v2 config — backend (Go)
+#
+# 注意: 冒頭の `version: "2"` は **config schema の version** である。
+# binary の version は CI 側 (golangci-lint-action の `version:`) と
+# backend/Makefile の `GOLANGCI_LINT_VERSION` で pin する。
+#
+# Linter set:
+#   - errcheck      : エラーを確かめずに捨てることを禁止。意図的に無視する場合は `_ = x.Close()` +
+#                     理由コメントの形に寄せる
+#   - govet         : printf の書式不一致・nil チェック漏れ等の怪しい構文
+#   - ineffassign   : 一度も読まれない代入
+#   - staticcheck   : SA ルール (deprecated API・恒真条件・到達不能コード等)
+#   - unused        : 未使用の var / const / field / func
+#   - gosec         : security smell。外部ツールの出力・外部由来のファイルパスという
+#                     「信用できない文字列」を扱うので価値が高い
+#   - forbidigo     : cmd/ が端末に出す文字列は必ず無害化 helper を通す (下の settings 参照)
+#   - revive        : exported-symbol の godoc **のみ** (下の settings 参照)
+#   - errorlint     : `err == sentinel` 比較と `%v` での error 埋め込みを禁止し、
+#                     errors.Is/As と `%w` に寄せる。wrap された error の取り逃しは
+#                     書き込みの失敗を静かに握り潰す事故に直結する
+#   - godox         : TODO/FIXME/HACK/XXX を main に持ち込ませない
+#   - mnd           : magic number 検出。
+#                     誤検知が多い linter なので下の settings で範囲を絞る
+#   - rowserrcheck  : sql.Rows の iteration 後に rows.Err() を見ないと、途中で切れた
+#                     結果セットを「全部読めた」と誤認する
+#   - sqlclosecheck : sql.Rows / sql.Stmt の Close 漏れ・defer 忘れ
+#   - copyloopvar   : Go 1.22+ で不要になった `v := v` の残骸を消させる
+#   - bodyclose     : HTTP response body の Close 漏れ
+#
+#   - depguard      : hexagonal の層境界を import graph の高さで enforce する
+#                     (core purity / cross-adapter / adapter の直接 exec)。
+#                     下の settings 参照
+#
+# 意図的に入れていないもの (「入っていそうで入っていない」の理由):
+#   - exportloopref : deprecated (Go 1.22 の loop 変数 semantics 変更で役目を終えた)。
+#                     後継の copyloopvar を使う
+version: "2"
+
+run:
+  timeout: 3m
+  # issue の path を git root 基準に固定する。v2 の既定 (`cfg` = config ファイルの
+  # 位置基準) のままだと、config の位置と git root がずれた瞬間に下の
+  # `path-except: ^backend/cmd/` がどの file にも一致しなくなり、forbidigo が**エラーを出さずに**
+  # 全域で無効になる (無音で検査が消える側に壊れる)。
+  # 動作確認済み: gitroot は `git init` 直後 (commit ゼロ) でも解決する。
+  #
+  # ⚠ **Go のツリーは `backend/` にある。** gitroot 基準なので
+  # 下の path の一致判定は必ず `backend/` から書く。ここを `^cmd/` に戻すと、
+  # 一致する file が 0 件になって forbidigo が無音で不活性になる。
+  relative-path-mode: gitroot
+  # Tests are part of the project; lint them too.
+  tests: true
+
+# format の検査。`golangci-lint run` は formatters の差分も issue として報告するので、
+# CI の backend-lint job と `make backend-lint` の両方が format の gate になる。
+#
+# ⚠ `formatters` に `default:` を書かない。**linters と違って schema に無い key** で、
+# `golangci-lint config verify` が `additional properties 'default' not allowed` で失敗する
+# (`run` は schema を見ないので、書いても指摘ゼロと区別が付かない)。既定で有効な
+# formatter は無いので、`enable` に並べた 2 つだけが走る。
+#
+# goimports は整形と import の並びの両方を見る。gofmt を重ねるのは、gofmt 側が既定で
+# `simplify` を有効にしており、goimports が行わない簡約 (`gofmt -s` 相当) を足すためである。
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - copyloopvar
+    - depguard
+    - errcheck
+    - errorlint
+    - forbidigo
+    - godox
+    - gosec
+    - govet
+    - ineffassign
+    - mnd
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - unused
+
+  settings:
+    depguard:
+      # ⚠ ここの module path は `backend/go.mod` の module 行と同じ値である。
+      # 片方だけ変えると rule が 1 件も一致しなくなり、**指摘ゼロと区別が付かない**。
+      # 変えたら意図的に違反を 1 つ書いて発火を確かめること。
+      rules:
+        # core/ は標準ライブラリと自分自身しか import しない。
+        #
+        # ⚠ files の glob は **絶対 path に対して** match する。repo-root 相対の
+        # `core/*.go` と書くと一度も match せず、rule が**エラーも出さずに動作しなく**
+        # なる。`**/` prefix を必ず付ける。
+        # 2 本目の glob は core/ に subpackage ができた場合も覆うため
+        # (`*` は path 区切りを跨がない)。
+        # ⚠ `!$test` は core の test が `internal/testsupport` を使えるようにするため。
+        # test 側の許可は下の `core-purity-test` が別に持つ。
+        # **この 2 本は対でしか成立しない** — 片方だけ消すと core の test が無検査になる
+        # (`!$test` だけ残した場合) か、test が testsupport を import できなくなる
+        # (`core-purity-test` だけ消した場合)。
+        core-purity:
+          files:
+            - "**/core/*.go"
+            - "**/core/**/*.go"
+            - "!$test"
+          allow:
+            - $gostd
+            - github.com/Intellectual-Chasen/Oraculum/backend/core
+
+        # core の **test file だけ** `internal/testsupport` を許す。
+        # repo root の解決を production と test で共有するため、test 側は testsupport を
+        # 通す必要がある。相対 path の文字列 (`"../../../datasets/..."`) で読む案は
+        # 採らない — 層を動かした瞬間に壊れる形を自分から再生産する。
+        #
+        # ⚠ `$test` を**正の要素として**足してはならない。正の glob は OR 結合なので、
+        # `files: ["**/core/**/*.go", "$test"]` と書くと repo 全体の test file に一致し、
+        # core と無関係な package まで allow-list で縛られる。file 名の glob で書く。
+        core-purity-test:
+          files:
+            - "**/core/*_test.go"
+            - "**/core/**/*_test.go"
+          allow:
+            - $gostd
+            - github.com/Intellectual-Chasen/Oraculum/backend/core
+            - github.com/Intellectual-Chasen/Oraculum/backend/internal/testsupport
+
+        # 入力形式への依存を binding_*.go に集約するため、production file を検査する。
+        # binding_*.go の test file は下の rule で別に検査する。
+        pipeline-adapter-import-is-limited-to-bindings:
+          files:
+            - "**/backend/pipeline/*.go"
+            - "**/backend/pipeline/**/*.go"
+            - "!**/backend/pipeline/binding_*.go"
+          deny:
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/adapters
+              desc: "pipeline adapter imports are limited to binding_*.go"
+
+        # test file は binding_*.go という名前でも adapter を直接 import しない。
+        # binding の許可 glob から test file を分離し、test にも同じ境界を適用する。
+        pipeline-test-adapter-import-is-forbidden:
+          files:
+            - "**/backend/pipeline/*_test.go"
+            - "**/backend/pipeline/**/*_test.go"
+          deny:
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/adapters
+              desc: "pipeline test files must not import adapters"
+
+        # api/ は HTTP の形だけを持ち、adapter を import しない。入力形式への依存は
+        # pipeline の binding が持つ。
+        # deny は 1 本で足りる — `pkg` は前方一致なので、新しい adapter も rule の
+        # 追記なしで対象になる。
+        # ⚠ `!$test` を付けない。api の test が adapter を import する形は「api が入力形式を
+        # 知っている」の兆候なので test でも止める。api の test は pipeline の公開関数
+        # (MarkIIParser / SquidParser) から parser を受け取る。
+        # ⚠ glob を 1 本に減らさない。直下用と subdirectory 用の 2 本が要る。
+        api-no-adapter-import:
+          files:
+            - "**/backend/api/*.go"
+            - "**/backend/api/**/*.go"
+          deny:
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/adapters
+              desc: "api must not import adapters; input format bindings belong in pipeline/"
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/assist
+              desc: "api must not import the relay; the relay calls the api over HTTP"
+
+        # assist/ は分析者の端末で動く中継であり、調査の状態と判定を持たない。server の判定は
+        # HTTP で呼び、提供者の CLI は cmd が登録する adapter の port で使う。
+        # ⚠ glob を 1 本に減らさない。直下用と subdirectory 用の 2 本が要る。
+        assist-boundary:
+          files:
+            - "**/backend/assist/*.go"
+            - "**/backend/assist/**/*.go"
+          deny:
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/pipeline
+              desc: "the relay must not hold the investigation; call the server over HTTP"
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/api
+              desc: "the relay must not import the api; call the server over HTTP"
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/adapters
+              desc: "the relay must not import adapters; cmd registers them through the Provider port"
+            - pkg: os/exec
+              desc: "the relay must not launch processes; provider adapters launch them via tooling/"
+
+        # pipeline は中継を知らない。
+        pipeline-no-assist-import:
+          files:
+            - "**/backend/pipeline/*.go"
+            - "**/backend/pipeline/**/*.go"
+          deny:
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/assist
+              desc: "pipeline must not import the relay"
+
+        # test の足場も縛る。ここを縛らないと、core の test が testsupport 経由で
+        # 何でも import できてしまい、`core-purity-test` で許した import がそのまま
+        # core の purity の検査の漏れになる。
+        #
+        # ⚠ glob を 1 本に減らさない。直下用と subdirectory 用の 2 本が要る。
+        # 1 本に減らすと rule がエラーを出さずに動作しなくなる。
+        testsupport-purity:
+          files:
+            - "**/internal/testsupport/*.go"
+            - "**/internal/testsupport/**/*.go"
+          allow:
+            - $gostd
+            - github.com/Intellectual-Chasen/Oraculum/backend/core
+
+        # adapter は生の診断値を返し、無害化は出口で 1 回だけ行う。
+        # ⚠ `!$test` を付けない。`adapter-no-cross-import` が `!$test` を要るのは
+        # deny の前方一致が **adapter 自身の外部 test package** に一致するからで、
+        # `output` にはその事情が無い。adapter の test が `output` を import する形は
+        # 「adapter が出力整形を持っている」の兆候なので、test でも止める。
+        adapter-no-output-import:
+          files:
+            - "**/adapters/*.go"
+            - "**/adapters/**/*.go"
+          deny:
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/output
+              desc: "adapters must return raw values; sanitize once at the output boundary"
+
+        # adapter は兄弟 adapter を import せず、**自身の subpackage も import しない**。
+        # adapter 間で共通の意味は core、外部処理の共通基盤は tooling に置く。
+        # deny は 1 本で足りる — `pkg` は前方一致なので、adapters/ 配下から自 module の
+        # adapters を import する形は兄弟でも自身の subpackage でも一致し、新しい adapter も
+        # rule の追記なしで対象になる。
+        # ⚠ **自身の subpackage だけを許す形は depguard では書けない。** `files` の glob は
+        # 検査する file の選択にしか使えず、検査する file 自身の package を `pkg` 側へ
+        # 差し込む変数が無い (特殊 token は `$all` / `$test` / `$gostd` だけ)。adapter 名を
+        # rule に列挙する形にすると、adapter を足したときの追記漏れが指摘ゼロと
+        # 区別できなくなる。
+        # ⚠ `!$test` が必要。deny は前方一致なので、付けないと **adapter 自身の外部
+        # test package** (`package foo_test` が `.../adapters/foo` を import する形) まで
+        # 拒否する。test は `package x_test` を既定とするので、付けないと adapter の test が
+        # すべて lint の指摘になる。
+        # **test file どうしの cross-import には機械の検査が無い。** deny は前方一致で
+        # あり、「自 package への import だけ許す」を表せない。adapter の test も兄弟
+        # adapter を import しない規約として守る。
+        #
+        # files の 3 行は `adapter-no-direct-exec` と完全に同じなので YAML anchor で
+        # 共有する。**2 rule の間で glob が食い違わないようにするため** — 直下用の
+        # glob が片方だけ欠けるとエラーを出さずに動作しなくなる。
+        # `adapter-no-output-import` は `!$test` を持たないので共有しない。
+        # YAML の sequence は merge できず、alias 先に 1 行足す書き方が無いため。
+        adapter-no-cross-import:
+          files: &adapters-prod-files
+            - "**/adapters/*.go"
+            - "**/adapters/**/*.go"
+            - "!$test"
+          deny:
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/adapters
+              desc: "adapters must not import sibling adapters; shared helpers belong in tooling/ or core/"
+            # adapter は自身を使う層を知らない。読める入力形式は adapter が core の型で
+            # 宣言し (core.InputFormat)、pipeline がその宣言を読んで収集元を振り分ける。
+            # この 2 本が無いと、adapter が pipeline の port を直接実装して依存の向きが
+            # 逆転する形を機械が止められない。`api` 側は逆向きの import が循環になり
+            # build が止めるが、意図を rule として残す。
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/pipeline
+              desc: "adapters must not import pipeline; declare readable formats with core.InputFormat and let pipeline collect them"
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/api
+              desc: "adapters must not import api; the HTTP shape belongs above the adapter boundary"
+            # 提供者の adapter は中継の port を import せずに満たす。port への合わせは cmd が行う。
+            - pkg: github.com/Intellectual-Chasen/Oraculum/backend/assist
+              desc: "adapters must not import the relay; cmd adapts them to the Provider port"
+
+        # 外部起動は tooling/ に集約する。os/exec の import 自体を禁止することで、
+        # 境界が import graph に現れる。test は除外 — tool 不在時の
+        # graceful skip が exec.LookPath を正当に使う。
+        # **test file からの os/exec の利用には機械の検査が無い。** adapter の test も
+        # 外部プロセスを tooling を通して起動する規約として守る。
+        adapter-no-direct-exec:
+          files: *adapters-prod-files
+          deny:
+            - pkg: os/exec
+              desc: "adapters must not use os/exec; launch subprocesses via tooling/"
+
+    errcheck:
+      check-type-assertions: false
+      check-blank: false
+      # `defer rows.Close()` / `defer db.Close()` の戻り値エラーは検査対象から外す
+      # (best-effort cleanup)。意図的にエラーを捨てるその他の箇所は
+      # `_ = x.Close()` + 理由コメントの形で書く。
+      # なお defer でない裸の `rows.Close()` は gosec G104 が検出するので検査の漏れにはならない。
+      exclude-functions:
+        - (io.Closer).Close
+        - (*os.File).Close
+        - (*database/sql.DB).Close
+        - (*database/sql.Rows).Close
+        - (*database/sql.Stmt).Close
+
+    forbidigo:
+      # cmd/ の出力には信用できない文字列 (外部ツールの生出力 / 外部由来のファイルパス)
+      # が流れ込む。端末の制御文字 (ANSI escape 等) を除く escaping helper を通さず
+      # fmt / 標準 log で直接出すと、operator の端末を偽装・汚染できてしまう。
+      # 「値を差し込んでいる呼び出しだけ」を機械で見分けるのは無理なので、cmd 配下では
+      # fmt の出力系と標準 log を丸ごと禁止する (差し込む値の無いリテラルは
+      # io.WriteString、機械可読な出力は encoding/json)。
+      #
+      # この linter は下の exclusions で cmd/ 以外を除外しており、その path の一致判定は
+      # 上の `run.relative-path-mode: gitroot` とペアで初めて成立する。片方だけ
+      # 消すと forbidigo は**エラーも出さずに**全 file で不活性になる。
+      exclude-godoc-examples: false
+      # 型情報で一致を調べる (alias import しても逃げられない)
+      analyze-types: true
+      forbid:
+        - pattern: ^fmt\.(Print|Printf|Println|Fprint|Fprintf|Fprintln)$
+          msg: "cmd/ から端末へ出す値は output.Fprintf / output.Fprintln を通すこと。差し込む値の無いリテラルは io.WriteString、機械可読な出力は encoding/json"
+        - pattern: ^log\.(Print|Printf|Println|Fatal|Fatalf|Fatalln|Panic|Panicf|Panicln)$
+          msg: "標準 log は無害化を通らない。slog + ReplaceAttr での escaping を使うこと"
+        # os.Stdout / os.Stderr への直接の書き込み。os.Stdout を output.Fprintf の
+        # 書き込み先として渡す形は残す。
+        # analyze-types が型で解決するので、一致を調べる名前は receiver の型を含む
+        # os.File.Write になる。os.Stdout.Write と (*os.File).Write はどちらも
+        # 1 件も一致しない。pattern を変えたら backend/cmd に
+        # `_, _ = os.Stdout.Write([]byte("x"))` を 1 行書いて発火を確かめる。
+        # 戻り値を捨てた裸の `os.Stdout.Write(...)` で確かめると、既定の
+        # uniq-by-line が同じ行の指摘を 1 件にまとめ、errcheck の指摘だけが出る。
+        # forbidigo が発火したかどうかをその形では判定できない。
+        - pattern: ^os\.File\.(Write|WriteString)$
+          msg: "cmd/ から端末へ出す値は output.Fprintf / output.Fprintln を通すこと。差し込む値の無いリテラルは io.WriteString"
+
+    revive:
+      # revive は `exported` (公開シンボルの godoc 必須) の 1 ルールだけを使う。
+      # ここで rules を明示しないと revive の**既定ルール一式**が走り、新人には
+      # ノイズの山になる — それがまさに避けたい罠。
+      rules:
+        - name: exported
+
+    godox:
+      # 対象は TODO / FIXME / HACK / XXX である。godox の既定は TODO/BUG/FIXME なので明示する。
+      # severity での格下げはしない — golangci-lint は severity に関係なく issue が
+      # あれば非ゼロ exit するので、severity は gate の強弱の lever にならない。
+      keywords:
+        - TODO
+        - FIXME
+        - HACK
+        - XXX
+
+    mnd:
+      # mnd は誤検知で悪名高いので、新 repo が埋もれない範囲に絞る:
+      #   - checks から assign / operation を外す。`const x = 3` への代入や
+      #     `n*2` のような演算まで拾うと定数化の強要が noise になる。
+      #     引数・case・条件・return に現れる裸の数値だけを見る
+      #   - 数値リテラルが自明な典型 API は ignored-functions で除外
+      #   - _test.go は下の exclusions で丸ごと除外 (test は literal だらけが正常)
+      checks:
+        - argument
+        - case
+        - condition
+        - return
+      ignored-functions:
+        - ^os\.(OpenFile|WriteFile|MkdirAll|Mkdir|Chmod)$
+        - ^make$
+        - ^time\.
+        - ^strconv\.
+        - ^context\.WithTimeout$
+
+  exclusions:
+    # Keep the global ignore set tight — every entry here is documented.
+    rules:
+      # forbidigo は cmd/ の出力規約を守るためだけの linter なので、cmd/ 以外の
+      # 全 package で無効にする (負 glob が使えないので
+      # 「backend/cmd で始まらない path を除外」の形で書く)。test の出力は operator の
+      # 端末に出ないので _test.go も対象外。
+      #
+      # ⚠ path は **git root 基準**である (上の `run.relative-path-mode`)。
+      # Go のツリーは `backend/` なので `^backend/cmd/` と書く。
+      - path-except: ^backend/cmd/
+        linters:
+          - forbidigo
+      - path: _test\.go$
+        linters:
+          - forbidigo
+      # Test files use unchecked errors and literals liberally. The tradeoff
+      # (test brevity vs lint signal) tips toward brevity for `_test.go`.
+      # mnd も除外 — table-driven test は数値 literal だらけが正常形。
+      - path: _test\.go$
+        linters:
+          - errcheck
+          - gosec
+          - mnd

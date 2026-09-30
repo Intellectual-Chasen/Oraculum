@@ -1,0 +1,2 @@
+go test fuzz v1
+string("日本語 e\u0301 \ufffd \\x0a")

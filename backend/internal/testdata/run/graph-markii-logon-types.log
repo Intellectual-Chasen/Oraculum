@@ -1,0 +1,7 @@
+02/01/2000 14:00:00.000 +0900 sn=301 evt=ps subEvt=start psGUID={L1} tmid=T1 com="HOST01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe"
+02/01/2000 14:00:01.000 +0900 sn=302 evt=ps subEvt=start psGUID={L2} tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 psPath="C:\app.exe"
+02/01/2000 14:00:02.000 +0900 sn=303 evt=os subEvt=evtLog tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 channel="Security" evtID=4624 evtRecID=9301 evtSrc="Microsoft-Windows-Security-Auditing" logonType="Network(3)" wsIp="192.0.2.1" wsPort=50031
+02/01/2000 14:00:03.000 +0900 sn=304 evt=os subEvt=evtLog tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 channel="Security" evtID=4624 evtRecID=9302 evtSrc="Microsoft-Windows-Security-Auditing" logonType="Network(3)" wsIp="192.0.2.1" wsPort=50032
+02/01/2000 14:00:04.000 +0900 sn=305 evt=os subEvt=evtLog tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 channel="Security" evtID=4624 evtRecID=9303 evtSrc="Microsoft-Windows-Security-Auditing" logonType="RemoteInteractive(10)" wsIp="192.0.2.1" wsPort=50033
+02/01/2000 14:00:05.000 +0900 sn=306 evt=os subEvt=evtLog tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 channel="Security" evtID=4624 evtRecID=9304 evtSrc="Microsoft-Windows-Security-Auditing" logonType="Unknown" wsIp="192.0.2.1" wsPort=50034
+02/01/2000 14:00:06.000 +0900 sn=307 evt=session subEvt=loginR tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 usr="alice" usrDomain="AD" srcCom="HOST01" srcIP="192.0.2.1" srcPort="50035"

@@ -1,0 +1,114 @@
+{
+  "description": "種別に依らない観測の解析の期待値。値は手作業で確定した。実装の出力を転記していない。",
+  "origin": {
+    "note": "合成した行だけを持つ。"
+  },
+  "requiredKeys": {
+    "note": "欠けたレコードから観測を作らず、stage が field_map の失敗を返す key。RecordObservation が持つ値の材料になる key だけを並べる。",
+    "keys": ["sn", "evt", "subEvt"],
+    "reason": {
+      "sn": "RecordLocator の sequenceNumber の材料。positionKind が sequence_number のとき必須",
+      "evt": "ObservationKind の raw の 2 要素の 1 つ",
+      "subEvt": "ObservationKind の raw の 2 要素の 1 つ"
+    },
+    "excluded": {
+      "note": "プロセス開始と通信が必須とする key のうち、種別に依らない観測が必須にしないもの。RecordObservation はいずれも持つ欄を持たず、必須にすると欠けたレコードを失敗に変える副作用だけが残る。",
+      "keys": ["tmid", "psGUID", "com", "csid", "psPath"],
+      "measurement": "evt=os subEvt=evtLog と evt=session のレコードは psGUID と psPath を持たない。",
+      "terminalId": "tmid を読んで端末へ対応付ける側が、その経路で必須とするかを決める。本 parser は tmid を持つ欄を持たない"
+    }
+  },
+  "headerTime": {
+    "note": "ヘッダーを日時として読めないレコードは、stage が normalize の失敗を返す。",
+    "stage": "normalize"
+  },
+  "fields": {
+    "note": "Fields はレコードが持つ全 key を原文の並び順で持つ。1 件目はヘッダーの時刻で、名前は headerTime である。cmd が符号化された文字列を持つレコードは、復号した行を decodedCmd の名前で足す。",
+    "absentKeyCompletion": "行わない。当該レコードに出ない key の項目を item_absent で足さない。通信のレコードだけが communicationOptionalKeys の 6 key を補う"
+  },
+  "observationKind": {
+    "note": "Raw は evt と subEvt の 2 件をこの順で持つ。Status は組を載せた表で決まる。レコードは Recorder のバージョンを持つ欄を持たないため、バージョンごとの表は和集合で探す。",
+    "determined": "バージョンごとの表の和集合にある組",
+    "inferred": "どのバージョンの表にも無く、レコードが持つ欄と前後のレコードから意味を推定した組",
+    "undetermined": "どちらの表にも無い組"
+  },
+  "documentedEventKinds": {
+    "note": "V3.0 と V3.2 の Recorder が出力する evt と subEvt の組。",
+    "v30": {
+      "sys": ["start", "stop", "run", "chgConf", "outDsk", "startRed", "stopRed"],
+      "os": ["startSafemode", "stopSafemode", "suspend", "resume", "chgDate", "evtLog"],
+      "dev": ["mnt", "unMnt", "mntd"],
+      "session": ["login", "loginFail", "loginR", "loginRFail", "logout", "lock", "unlock", "conR", "dconR", "startSCR", "stopSCR"],
+      "ps": ["start", "stop", "run", "inject", "guardInject"],
+      "file": ["close", "del", "rename", "copy", "chgAttr", "delDir", "renameDir", "impWPD", "expWPD", "renameWPD", "delWPD", "download", "unblock", "enableMacro"],
+      "reg": ["setVal", "delKey", "delVal", "renameKey"],
+      "prt": ["create"],
+      "win": ["active"],
+      "clip": ["paste"],
+      "net": ["con", "acpt", "dcon", "lsn", "webURL", "chgSSID", "dnsQuery", "mailSend", "mailRecv"],
+      "windowsDefender": ["dtctMalState"]
+    },
+    "v32": {
+      "sys": ["start", "stop", "run", "chgConf", "outDsk", "startRed", "stopRed", "suspendLog", "resumeLog", "restart", "suspendPSMon", "resumePSMon"],
+      "os": ["startSafemode", "stopSafemode", "suspend", "resume", "chgDate", "evtLog", "start", "stop"],
+      "dev": ["mnt", "unMnt", "mntd", "con", "dcon"],
+      "session": ["login", "loginFail", "loginR", "loginRFail", "logout", "lock", "unlock", "conR", "dconR", "startSCR", "stopSCR"],
+      "ps": ["start", "stop", "run", "inject", "guardInject"],
+      "file": ["close", "del", "rename", "copy", "chgAttr", "delDir", "renameDir", "impWPD", "expWPD", "renameWPD", "delWPD", "download", "unblock", "enableMacro", "upload"],
+      "reg": ["setVal", "delKey", "delVal", "renameKey"],
+      "prt": ["create"],
+      "win": ["active", "inactive", "psActive", "psInactive"],
+      "clip": ["copy", "paste"],
+      "net": ["con", "acpt", "dcon", "lsn", "webURL", "chgSSID", "dnsQuery", "mailSend", "mailRecv", "login"],
+      "wmi": ["psCreate"],
+      "powerShell": ["exec"],
+      "windowsDefender": ["scnComplete", "scnCancel", "scnFail", "qrtnRestore", "qrtnRestoreFail", "qrtnDel", "qrtnDelFail", "dtctMalState", "malStateActTaken", "malStateActFail", "malStateActCritFail", "ASRBlock", "ASRAudit", "sigUpdate", "sigUpdateFail", "engUpdate", "engUpdateFail", "chgConf", "smartScrnApp", "smartScrnUri", "smartScrnUsr"]
+    }
+  },
+  "observedKinds": {
+    "measurement": "Recorder が出力する evt と subEvt の組。evt と subEvt の辞書順に並べる。",
+    "inferredNote": "inferred の組は V3.0 と V3.2 のどちらの表にも載らず、レコードが持つ欄と前後のレコードから意味を推定した組である。推定した意味と根拠は backend/adapters/markii/record_observation_fields.go の inferredSubEvents が持つ。",
+    "kinds": [
+      {"evt": "clip", "subEvt": "copy", "documented": true, "status": "determined"},
+      {"evt": "clip", "subEvt": "paste", "documented": true, "status": "determined"},
+      {"evt": "file", "subEvt": "chgAttr", "documented": true, "status": "determined"},
+      {"evt": "file", "subEvt": "close", "documented": true, "status": "determined"},
+      {"evt": "file", "subEvt": "copy", "documented": true, "status": "determined"},
+      {"evt": "file", "subEvt": "create", "documented": false, "status": "inferred"},
+      {"evt": "file", "subEvt": "createDir", "documented": false, "status": "inferred"},
+      {"evt": "file", "subEvt": "del", "documented": true, "status": "determined"},
+      {"evt": "file", "subEvt": "delDir", "documented": true, "status": "determined"},
+      {"evt": "file", "subEvt": "download", "documented": true, "status": "determined"},
+      {"evt": "file", "subEvt": "rename", "documented": true, "status": "determined"},
+      {"evt": "file", "subEvt": "renameDir", "documented": true, "status": "determined"},
+      {"evt": "net", "subEvt": "acpt", "documented": true, "status": "determined"},
+      {"evt": "net", "subEvt": "con", "documented": true, "status": "determined"},
+      {"evt": "net", "subEvt": "dcon", "documented": true, "status": "determined"},
+      {"evt": "net", "subEvt": "est", "documented": false, "status": "inferred"},
+      {"evt": "net", "subEvt": "openUDP", "documented": false, "status": "inferred"},
+      {"evt": "net", "subEvt": "webURL", "documented": true, "status": "determined"},
+      {"evt": "os", "subEvt": "evtLog", "documented": true, "status": "determined"},
+      {"evt": "powerShell", "subEvt": "exec", "documented": true, "status": "determined"},
+      {"evt": "ps", "subEvt": "start", "documented": true, "status": "determined"},
+      {"evt": "ps", "subEvt": "stop", "documented": true, "status": "determined"},
+      {"evt": "reg", "subEvt": "create", "documented": false, "status": "inferred"},
+      {"evt": "reg", "subEvt": "delKey", "documented": true, "status": "determined"},
+      {"evt": "reg", "subEvt": "delVal", "documented": true, "status": "determined"},
+      {"evt": "reg", "subEvt": "setVal", "documented": true, "status": "determined"},
+      {"evt": "session", "subEvt": "conR", "documented": true, "status": "determined"},
+      {"evt": "session", "subEvt": "dconR", "documented": true, "status": "determined"},
+      {"evt": "session", "subEvt": "lock", "documented": true, "status": "determined"},
+      {"evt": "session", "subEvt": "login", "documented": true, "status": "determined"},
+      {"evt": "session", "subEvt": "loginR", "documented": true, "status": "determined"},
+      {"evt": "session", "subEvt": "loginRFail", "documented": true, "status": "determined"},
+      {"evt": "session", "subEvt": "logout", "documented": true, "status": "determined"},
+      {"evt": "session", "subEvt": "unlock", "documented": true, "status": "determined"},
+      {"evt": "sys", "subEvt": "startRed", "documented": true, "status": "determined"},
+      {"evt": "sys", "subEvt": "stop", "documented": true, "status": "determined"},
+      {"evt": "sys", "subEvt": "stopRed", "documented": true, "status": "determined"},
+      {"evt": "win", "subEvt": "active", "documented": true, "status": "determined"},
+      {"evt": "win", "subEvt": "psInactive", "documented": true, "status": "determined"},
+      {"evt": "wmi", "subEvt": "psCreate", "documented": true, "status": "determined"}
+    ]
+  }
+}

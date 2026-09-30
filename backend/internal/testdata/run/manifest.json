@@ -1,0 +1,6 @@
+[
+  {"file":"markii.log","format":"infotrace_mark_ii","digest":"e3d71e0c957602fbcf7d19add18fdcac5a3c45910f3eff0bb875be8e748ed045","size":129,"newlines":2,"read":2,"succeeded":2,"failed":0,"state":"published_full"},
+  {"file":"squid.log","format":"squid_combined","digest":"bd15a4b1a58bdb27b9cf3e6455ac491ed7bfc4504dd3e3d7edbf91453ec780a1","size":121,"newlines":1,"read":1,"succeeded":1,"failed":0,"state":"published_full"},
+  {"file":"partial.log","format":"squid_combined","digest":"227e1d0b7b063ad2a4f4d2cce1bfad4ea15fe8194a3ba3e32ebd7028e8aa0d3e","size":136,"newlines":3,"read":3,"succeeded":1,"failed":2,"state":"published_partial"},
+  {"file":"collision.log","format":"infotrace_mark_ii","digest":"10fd4c8dad8b6ef82e9028bdd522bdb6d7481d5dcf438d880112958775ffb9e5","size":130,"newlines":2,"read":2,"succeeded":2,"failed":0,"state":"withheld"}
+]

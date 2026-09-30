@@ -1,0 +1,2 @@
+192.0.2.28 - - [06/Apr/2024:07:08:09 +0000] "GET http://cli.test/ HTTP/1.1" 200 4 "-" "cli-test" TCP_MISS:HIER_DIRECT
+invalid cli record

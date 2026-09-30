@@ -1,0 +1,87 @@
+/*
+ * 画面の CSS の入口。layer の順で優先を決める。後ろの layer が前の layer に勝つ。
+ *
+ * - vendor: dockview の既定の見た目
+ * - legacy: theme.css と layout.css。Tailwind へ移していない区画の見た目
+ * - theme / utilities: Tailwind。新しい部品の class は legacy の要素 selector に勝つ
+ *
+ * Tailwind の preflight は読み込まない。legacy の区画の見た目を変えないためである。
+ */
+@layer vendor, legacy, theme, utilities;
+
+@import "@fontsource/ibm-plex-sans-jp/400.css";
+@import "@fontsource/ibm-plex-sans-jp/500.css";
+@import "@fontsource/ibm-plex-sans-jp/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "dockview-react/dist/styles/dockview.css" layer(vendor);
+@import "./theme.css" layer(legacy);
+@import "./layout.css" layer(legacy);
+@import "./import.css" layer(legacy);
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* テーマ変更時はフォルダー・ファイルのアイコンを含む全要素の配色を同時に更新する。 */
+@layer utilities {
+  :root[data-theme-changing] *,
+  :root[data-theme-changing] *::before,
+  :root[data-theme-changing] *::after {
+    transition: none;
+  }
+}
+
+/*
+ * theme.css の変数を Tailwind の名前で使えるようにする。inline にして、暗い配色で変数が
+ * 切り替わると class の色も切り替わるようにする。
+ */
+@theme inline {
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
+
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-pressed: var(--accent-pressed);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-running: var(--status-running);
+  --color-done: var(--status-done);
+  --color-failed: var(--status-failed);
+  --color-pending: var(--status-pending);
+  --color-idle: var(--status-idle);
+  --color-kind-terminal: var(--kind-terminal);
+  --color-kind-process: var(--kind-process);
+  --color-kind-file: var(--kind-file);
+  --color-kind-registry-value: var(--kind-registry_value);
+  --color-kind-account: var(--kind-account);
+  --color-kind-ip: var(--kind-ip);
+  --color-kind-domain: var(--kind-domain);
+  --color-kind-record: var(--kind-record);
+}
+
+/* 大量のレコードを読む画面なので、本文を 13px にして 1 画面の情報量を保つ。 */
+@theme {
+  --text-xs: 11px;
+  --text-xs--line-height: 16px;
+  --text-sm: 12px;
+  --text-sm--line-height: 18px;
+  --text-base: 13px;
+  --text-base--line-height: 20px;
+  --text-md: 14px;
+  --text-md--line-height: 20px;
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+  /* 入力欄と button は 4px、浮く要素 (候補の一覧、tooltip) は 6px。 */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --shadow-float: 0 6px 20px -8px rgb(23 34 44 / 25%);
+  --default-transition-duration: 120ms;
+}

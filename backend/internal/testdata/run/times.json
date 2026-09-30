@@ -1,0 +1,6 @@
+[
+  {"name":"failed_request_time","format":"squid_combined","input":"192.0.2.17 - - [05/Apr/2024:06:07:08 +0000] \"GET http://sample.test/ INVALID\" 200 3 \"-\" \"run-test\" TCP_MISS:HIER_DIRECT\n","first":"2024-04-05T06:07:08Z","last":"2024-04-05T06:07:08Z","failures":1},
+  {"name":"no_readable_time","format":"squid_combined","input":"broken source\n","first":"","last":"","failures":1},
+  {"name":"time_order_against_line_order","format":"infotrace_mark_ii","input":"04/05/2024 06:07:09.009 +0000 sn=12 evt=file subEvt=close tmid=t\n04/05/2024 06:07:08.009 +0000 sn=9 evt=file subEvt=close tmid=t\n","first":"2024-04-05T06:07:08.009Z","last":"2024-04-05T06:07:09.009Z","failures":0},
+  {"name":"failed_record_widens_the_range","format":"squid_combined","input":"192.0.2.17 - - [05/Apr/2024:06:07:09 +0000] \"GET http://sample.test/ HTTP/1.1\" 200 3 \"-\" \"run-test\" TCP_MISS:HIER_DIRECT\n192.0.2.17 - - [05/Apr/2024:06:07:07 +0000] \"GET http://sample.test/ INVALID\" 200 3 \"-\" \"run-test\" TCP_MISS:HIER_DIRECT\n","first":"2024-04-05T06:07:07Z","last":"2024-04-05T06:07:09Z","failures":1}
+]

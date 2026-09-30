@@ -1,0 +1,1341 @@
+/* 画面の配置。色と部品の基準は theme.css が持つ。 */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* AI 提案を分析者のメモと見分ける印。 */
+.ai-proposal-mark {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12px;
+}
+
+.ai-proposal {
+  margin-bottom: 12px;
+  padding-left: 8px;
+  border-left: 3px solid var(--accent-soft);
+}
+
+.help-popover {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+/* 見出しと文の中に置く印なので、行の高さを変えない。 */
+.help-popover-trigger {
+  display: inline-flex;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--faint);
+  cursor: help;
+}
+
+.help-popover-trigger:hover,
+.help-popover-trigger[aria-expanded="true"] {
+  color: var(--accent);
+}
+
+.help-popover-content {
+  position: fixed;
+  z-index: 1000;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 16px));
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+/* 説明の中の区切りの見出し。 */
+.help-section {
+  display: block;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/*
+ * 空白を持たない長い文字列 (URL、path、hash) の欄。文字列の中で折り返し、表を列の幅に収める。
+ * 表が列の幅を超えたときも、欄が 1 文字ずつに折り返す幅まで縮まない下限を置く。
+ */
+.wrapping-cell {
+  word-break: break-all;
+  min-width: 12em;
+}
+
+/*
+ * 空白で区切られた日本語の説明の欄 (関係の種別と状態の名前)。折り返しを許し、見出しの幅まで
+ * 縮まない下限を置く。
+ */
+.label-cell {
+  min-width: 11em;
+}
+
+/* 種別の名前や操作の button のような短い文字列。文字列の途中で折り返さない。 */
+.short-cell {
+  white-space: nowrap;
+}
+
+/* ---- 画面の枠: 上部の帯と、ビューの作業場所 ---- */
+
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 処理を終えるまでの段階の画面。画面の高さを超える内容は画面の中でスクロールする。 */
+.stages-page {
+  overflow: auto;
+  padding: 0 16px 16px;
+}
+
+/* 読み込む収集元の入力欄を 1 項目 1 行で並べる。 */
+.stages-form label {
+  display: block;
+  margin-top: 6px;
+}
+
+.stages-form fieldset {
+  margin-bottom: 8px;
+}
+
+.appbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--bar-height);
+  padding: 4px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  z-index: 10;
+}
+
+.appbar h1 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ---- 上部のメニューバーと、メニュー ---- */
+
+.menubar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: auto;
+}
+
+.menubar > [role="menuitem"] {
+  border: 0;
+  background: transparent;
+  padding: 0 10px;
+  color: var(--ink);
+}
+
+.menubar > [role="menuitem"]:hover,
+.menubar > [role="menuitem"][aria-expanded="true"] {
+  background: var(--surface-2);
+}
+
+.menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 12em;
+  max-width: min(32em, calc(100vw - 8px));
+  max-height: calc(100vh - 8px);
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.menu:focus {
+  outline: none;
+}
+
+.menu > [role="menuitem"] {
+  display: block;
+  width: 100%;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  text-align: left;
+  color: var(--ink);
+}
+
+.menu > [role="menuitem"]:focus {
+  outline: none;
+  background: var(--accent-soft);
+}
+
+.menu > [role="menuitem"][aria-disabled="true"] {
+  color: var(--faint);
+  cursor: not-allowed;
+}
+
+.menu-separator {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 4px 0;
+}
+
+/* 行の操作のメニューを開く「…」の button。 */
+.row-menu-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  color: var(--muted);
+  vertical-align: middle;
+}
+
+/* 値を写した結果の通知。 */
+.copy-notice [role="status"],
+.copy-notice [role="alert"] {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.copy-notice [role="alert"] {
+  color: var(--danger);
+}
+
+/* ログインしている利用者とログアウトのボタン、開いているワークスペースと保存の状態を 1 行に並べる。 */
+.workspace-bar,
+.account-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.login-form {
+  max-width: 360px;
+}
+
+.login-form label {
+  display: block;
+}
+
+/* 調査の画面を包む。包まない場合と同じ配置で描く。 */
+.session-content {
+  display: contents;
+}
+
+/* セッションが切れたときに、調査の画面の上へ重ねるログインの form。 */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 40%);
+}
+
+.login-dialog {
+  max-width: 480px;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+/* ---- ビューの作業場所 ---- */
+
+.dock-workspace {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dock-actions {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px;
+}
+
+.dock-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.dock-actions button:hover {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.dock-view {
+  flex: 1;
+  min-height: 0;
+  --dv-tabs-and-actions-container-height: var(--bar-height);
+  --dv-tabs-and-actions-container-font-size: 12.5px;
+  --dv-group-view-background-color: var(--surface);
+  --dv-tabs-and-actions-container-background-color: var(--surface);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--surface);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--surface);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--surface);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: var(--surface);
+  --dv-activegroup-visiblepanel-tab-color: var(--ink);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--ink);
+  --dv-activegroup-hiddenpanel-tab-color: var(--muted);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--muted);
+  --dv-separator-border: var(--line);
+  --dv-tab-divider-color: transparent;
+}
+
+/* タブの帯の下端に線を引き、選択中のタブは accent の下線で示す (VS Code の下の panel と同じ形)。 */
+.dock-view .dv-tabs-and-actions-container {
+  border-bottom: 1px solid var(--line);
+}
+
+.dock-view .dv-tab {
+  padding: 0 10px;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+
+.dock-view .dv-tab.dv-active-tab {
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.dock-view .dv-tab:hover {
+  color: var(--ink);
+}
+
+/* 閉じる × は、選択中と hover のタブだけに出す。focus を受けたときも出す。 */
+.dock-view .dv-default-tab-action {
+  visibility: hidden;
+}
+
+.dock-view .dv-tab.dv-active-tab .dv-default-tab-action,
+.dock-view .dv-tab:hover .dv-default-tab-action,
+.dock-view .dv-default-tab-action:focus-visible {
+  visibility: visible;
+}
+
+/* 入りきらないタブは横に scroll する。scrollbar は隠し、右端の一覧から選べる。 */
+.dock-view .dv-scrollbar {
+  display: none;
+}
+
+/* 帯の端で一部だけ見えるタブは名前の途中で切らず、丸ごと隠して右端の一覧に任せる。 */
+.dock-view .dv-tab.dock-tab-clipped {
+  visibility: hidden;
+}
+
+.dock-panel {
+  height: 100%;
+  overflow: auto;
+  background: var(--surface);
+}
+
+.pane-search,
+.pane-detail,
+.view-pane {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.view-pane {
+  display: grid;
+  /* 列の幅を区画の幅に固定する。中身の最小の幅で列が区画より広がると、右端が隠れる。 */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/*
+ * 節を並べる区画 (Time & Host と Host Detail) の見出しは 2 段にする。節の見出しは 16px、
+ * 節の中の見出しは 14px である。
+ */
+.pane-sections,
+.terminal-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  align-content: start;
+}
+
+.pane-sections > section,
+.terminal-detail > section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+.host-title {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.pane-graph {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.pane-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---- 左の列: 検索の条件と結果 ---- */
+
+.condition-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.condition-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: var(--control-height);
+  padding: 0 2px 0 8px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  font-size: 12.5px;
+}
+
+.condition-chips li.is-excluded {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.chip-label {
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.chip-value {
+  font-family: var(--mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* AI 支援との会話の欄。 */
+.assist-events {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.assist-message {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+
+.assist-message.is-analyst {
+  background: var(--accent-soft);
+}
+
+.assist-speaker,
+.ai-mark,
+.card-title {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+/* 会話の文字列は改行を保ち、長い文字列を折り返す。 */
+.assist-text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* AI の応答の Markdown。段落と表の升目は改行を保ち、コードは空白も保つ。 */
+.assist-markdown-frame {
+  position: relative;
+}
+
+.assist-markdown-toggle {
+  position: absolute;
+  top: -22px;
+  right: 0;
+}
+
+.assist-markdown {
+  overflow-wrap: anywhere;
+}
+
+.assist-markdown > :first-child {
+  margin-top: 0;
+}
+
+.assist-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.assist-markdown :is(p, td, th) {
+  white-space: pre-line;
+}
+
+.assist-markdown :is(ul, ol) {
+  padding-left: 1.4em;
+}
+
+.assist-markdown ul {
+  list-style: disc;
+}
+
+.assist-markdown ol {
+  list-style: decimal;
+}
+
+.assist-markdown :is(h1, h2, h3, h4, h5, h6) {
+  margin: 8px 0 4px;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.assist-markdown code {
+  white-space: pre-wrap;
+  font-family: var(--mono);
+}
+
+.assist-markdown pre {
+  overflow-x: auto;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.assist-markdown table {
+  border-collapse: collapse;
+}
+
+.assist-markdown :is(td, th) {
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+}
+
+.assist-markdown blockquote {
+  margin: 4px 0;
+  padding-left: 8px;
+  border-left: 3px solid var(--muted);
+}
+
+/* tool の呼び出し。開いたときに入力と結果の JSON を出す。 */
+.assist-tool summary {
+  cursor: pointer;
+}
+
+.assist-tool-body {
+  max-height: 320px;
+  margin: 0;
+  overflow: auto;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.assist-error {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.search-query-card {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+/* card の chip は外す button を持たないため、右の余白を左と揃える。 */
+.card-chips {
+  margin: 0;
+}
+
+.card-chips li {
+  padding-right: 8px;
+}
+
+.ai-explanation {
+  padding: 6px 10px;
+  border-left: 3px solid var(--hit-ink);
+  background: var(--hit-soft);
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.assist-form {
+  display: grid;
+  gap: 6px;
+}
+
+.assist-form textarea {
+  width: 100%;
+  font: inherit;
+}
+/* 検索式の誤り: 理由と位置と、誤りの範囲に印を付けた式。 */
+.search-expression-error {
+  display: grid;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: var(--danger-soft);
+  color: var(--ink);
+  font-size: 12.5px;
+}
+
+.search-expression-echo {
+  font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.search-expression-echo mark {
+  background: transparent;
+  color: var(--danger);
+  font-weight: 600;
+  text-decoration: underline wavy var(--danger);
+  text-underline-offset: 3px;
+}
+
+/* 長さ 0 の誤りの目印。字の間に縦の線を置く。 */
+.search-expression-echo mark.search-expression-point {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-inline: 1px;
+  vertical-align: text-bottom;
+  background: var(--danger);
+}
+
+.help {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.result-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.result-count {
+  font-size: 13px;
+}
+
+.result-number {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kind-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  list-style: none;
+  padding: 0;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.kind-counts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.kind-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* ---- 中央の列: 図 ---- */
+
+.pane-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-height: var(--bar-height);
+  padding: 4px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+/* 左の列の先頭に置く、関係先・親子の連鎖を表示している間の欄。 */
+.exploration-status {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  background: var(--hit-soft);
+  color: var(--hit-ink);
+  border-radius: var(--radius);
+}
+
+.exploration-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.origin-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 枠の線は内側の影で描き、中の button と chip の高さを同じにする。 */
+.origin-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--control-height);
+  padding: 0 0 0 8px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+  border-radius: 999px;
+}
+
+.origin-chips button {
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+}
+
+.zoom-controls {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.figure {
+  position: relative;
+  flex: 1;
+  /* 区画が低くても図を潰さない。区画に入りきらない分は区画の中で scroll する。 */
+  min-height: 320px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--canvas);
+  background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* 図で値を写した結果の通知は、図の左上に重ねる。図の高さを変えない。 */
+.figure > .copy-notice {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 2;
+  max-width: 60%;
+}
+
+.figure > .copy-notice > * {
+  margin-top: 0;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.subgraph-canvas {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 240px;
+  overflow: hidden;
+}
+
+/* 図の canvas を流れから外し、canvas の大きさが容器の高さを押し広げないようにする。 */
+.subgraph-canvas > canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ラベルの層を cosmos.gl の canvas の上に重ね、指す操作は下の canvas へ通す。 */
+.subgraph-canvas > .subgraph-labels {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.figure-placeholder {
+  margin: auto;
+  color: var(--muted);
+}
+
+/* 図の上の 1 行。図が何を描いているかの値の組と、図の表示を終える操作を置く。 */
+.figure-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 2px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+/*
+ * 操作できる表の値 (ValueLink)。値の文字のまま置き、hover で下線を引く。表のセルの中で class を
+ * 持たない button も値として描き、押せる値と押せない値を同じ見た目にする。
+ */
+button.value-link,
+:is(td, th) button:not([class]) {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.value-link:hover:not(:disabled),
+button.value-link[data-hovered],
+:is(td, th) button:not([class]):hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+button.value-link[data-focus-visible],
+button.value-link:focus-visible,
+:is(td, th) button:not([class]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* 並べ替えられる列の見出し。見出しの文字と同じ見た目にし、並びの向きを矢印で示す。 */
+button.sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+button.sort-header .sort-idle {
+  opacity: 0.5;
+}
+
+/* 「名前: 値」の組を横に並べる。 */
+.value-pairs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+}
+
+/* 組は 1 行に収まる間は折り返さずに次の行へ送る。1 行に収まらない長い値 (検索式、SHA-256) は
+   値の中で折り返す。名前は折り返さない。 */
+.value-pairs > li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pair-name {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.influence-path h3 {
+  margin-top: 4px;
+}
+
+.draw-limit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 上限を超えて図を描かないときに、図の中央に重ねる値の組と操作。 */
+.withheld {
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+}
+
+/* 影響の経路が無いときに、Path のビューに出す理由。 */
+.influence-path-empty {
+  display: grid;
+  gap: 8px;
+}
+
+.graph-legend {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  list-style: none;
+  margin: 0;
+  padding: 5px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.legend-line {
+  display: inline-block;
+  width: 1.4rem;
+  border-top: 3px solid;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+.graph-legend .kind-dot {
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+.pane-graph > [role="status"] {
+  padding: 8px 14px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+}
+
+/* 図の下の一覧と ATT&CK 候補。開いた一覧は図の列の半分までを使い、中でスクロールする。 */
+.below-figure {
+  max-height: 50%;
+  overflow: auto;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 4px 14px;
+  font-size: 13px;
+}
+
+/*
+ * 行の操作の列を表の左端に置いて留め、列の多い表を横に scroll しても button を見えるままにする。
+ * 左端の列は scroll していない間は本来の位置にあり、ほかの列の値に重ならない。
+ */
+.row-actions {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  white-space: nowrap;
+  background: var(--surface);
+  box-shadow: inset -1px 0 0 var(--line);
+}
+
+/*
+ * 値を 1 行に 1 つずつ並べる欄。長い値は省略し、全体を title の tooltip に出す。
+ */
+.value-lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.value-lines > li {
+  max-width: 24em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lists-pane {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+}
+
+.lists-pane > details[open] {
+  flex-basis: 100%;
+}
+
+/* tab の名前に添える件数。 */
+.tab-count {
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+/* 見出しの文字列は tab が出すため、見た目からだけ外し、読み上げには残す。 */
+.attack-pane h3 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.pane-detail tbody th,
+.record-sheet tbody th,
+.pane-detail td > button,
+.record-sheet td > button {
+  white-space: nowrap;
+}
+
+/* ---- 右の列: 詳細 ---- */
+
+.empty-hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.node-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.node-header {
+  display: grid;
+  gap: 4px;
+}
+
+.kind-badge {
+  justify-self: start;
+  font-size: 11.5px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 8px;
+}
+
+.node-title {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.node-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-block: 4px;
+}
+
+.more-detail {
+  font-size: 12.5px;
+}
+
+/* 開閉できる欄。見出しは summary が持つため、中の表の caption は読み上げだけに残す。 */
+.fold-summary {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/*
+ * 根拠のレコードの表。1 件を折り返さない 1 行で出し、区画の幅に収まらないときは表を横に
+ * スクロールさせる (区画の表は block で横にスクロールする)。
+ */
+.pane-detail .evidence-table th,
+.pane-detail .evidence-table td,
+.record-sheet .evidence-table th,
+.record-sheet .evidence-table td {
+  white-space: nowrap;
+  vertical-align: middle;
+  padding-inline: 6px;
+}
+
+.fold > table > caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.add-term {
+  font-size: 11.5px;
+  padding: 0 6px;
+  margin-left: 4px;
+  color: var(--accent);
+  border-color: transparent;
+  background: transparent;
+}
+
+.add-term:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+
+/* ---- 時系列: 原文から探す欄と、一致して見せている行 ---- */
+
+.timeline-find-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.find-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timeline-find-all {
+  max-height: 12em;
+  overflow: auto;
+}
+
+.timeline-row-focused {
+  background: var(--accent-soft);
+}
+
+.time-histogram svg {
+  cursor: crosshair;
+  user-select: none;
+}
+
+.time-histogram rect {
+  fill: var(--accent);
+}
+
+.time-histogram rect.histogram-selected {
+  stroke: currentColor;
+}
+
+/* 格子の下の時刻の目盛り。目盛りは列の左端に置く。 */
+.time-histogram .histogram-axis {
+  position: relative;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.time-histogram .histogram-axis li {
+  position: absolute;
+  top: 0;
+  border-left: 1px solid var(--line);
+  padding-left: 2px;
+  white-space: nowrap;
+}
+
+.time-histogram text {
+  fill: currentColor;
+  font-size: 11px;
+}
+
+.source-include label {
+  display: block;
+}
+
+.node-summaries tr[aria-current="true"] {
+  background: var(--accent-soft);
+}
+
+/* ---- 下の欄: 開いたレコードの原文と前後 ---- */
+
+.record-sheet {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--bar-height);
+  padding: 4px 14px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+/* 位置は長くなるので 1 行で省略する。見出しと閉じる button は折り返さない。 */
+.sheet-position {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+
+.sheet-record,
+.sheet-context {
+  overflow: auto;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sheet-context {
+  border-left: 1px solid var(--line);
+}
+
+.sheet-record pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.65;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin: 0;
+}
+
+/* 区画の幅が狭いときは、原文と前後を 1 列に積む。画面の幅でなく区画の幅で決める。 */
+.record-sheet {
+  container-type: inline-size;
+}
+
+@container (max-width: 1400px) {
+  .sheet-body {
+    grid-template-columns: 1fr;
+  }
+
+  .sheet-context {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+}
+
+/* 列の幅を区画に合わせる表。長い値は td の側で省略し、title で全体を出す。 */
+.record-sheet .fit-table {
+  table-layout: fixed;
+}
+
+.record-sheet .fit-table td {
+  overflow: hidden;
+}
+
+/* ---- 検索の条件に一致した文字列・期間に入る時刻・行 ---- */
+
+.search-mark {
+  background: var(--hit-soft);
+  color: var(--hit-ink);
+  box-shadow: inset 0 -2px 0 var(--hit-ink);
+  border-radius: 2px;
+}
+
+/* 期間の内か外かを決められない時刻。 */
+.search-unjudged {
+  outline: 1px dashed var(--hit-ink);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+.search-matched-row > :first-child {
+  box-shadow: inset 3px 0 0 var(--hit-ink);
+}

@@ -1,0 +1,5 @@
+192.0.2.1 - - [01/Feb/2000:13:00:08 +0900] "GET http://example.test/ HTTP/1.1" 200 12 "-" "test" TCP_MISS:DIRECT
+192.0.2.1 - - [01/Feb/2000:13:00:09 +0900] "GET http://198.51.100.7:8080/a HTTP/1.1" 200 12 "-" "test" TCP_MISS:DIRECT
+192.0.2.1 - - [01/Feb/2000:13:00:12 +0900] "GET http://198.51.100.7:8080/b HTTP/1.1" 200 12 "-" "test" TCP_MISS:DIRECT
+192.0.2.9 - - [01/Feb/2000:13:00:05 +0900] "GET http://198.51.100.7:8080/c HTTP/1.1" 200 12 "-" "test" TCP_MISS:DIRECT
+192.0.2.1 - - [01/Feb/2000:13:00:14 +0900] "GET error:invalid-request HTTP/1.1" 400 12 "-" "test" TAG_NONE:HIER_NONE

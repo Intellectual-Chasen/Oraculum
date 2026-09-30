@@ -1,0 +1,31 @@
+id: attack.t1021.remote-services
+title: Remote Services
+description: 観測された遠隔セッションと接続元アドレスの対応を確認する候補。
+references:
+  - https://attack.mitre.org/techniques/T1021/
+attack:
+  - id: T1021
+    basis: inferred
+variants:
+  - id: default
+    rationale: 遠隔セッションと、その接続元端末の address topology を評価する。
+    pattern:
+      hosts: [session_source, remote_terminal]
+      nodes:
+        client_ip:
+          kind: ip
+      edges:
+        session:
+          kind: terminal_remote_session
+          from: session_source
+          to: remote_terminal
+        address:
+          kind: terminal_address
+          from: session_source
+          to: client_ip
+      joins:
+        - equal:
+            - session.connection.source_address
+            - client_ip.terminal.ip_address
+      evidence:
+        required: [session, address]

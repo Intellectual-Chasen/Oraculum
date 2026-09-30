@@ -1,0 +1,8 @@
+[
+  {"name":"empty","succeeded":0,"failed":0,"readStopped":false,"failures":[],"read":0,"failureCount":0,"diagnoses":[0,0,0,0]},
+  {"name":"success","succeeded":2,"failed":0,"readStopped":false,"failures":[],"read":2,"failureCount":0,"diagnoses":[0,0,0,0]},
+  {"name":"positioned_failure","succeeded":1,"failed":1,"readStopped":false,"failures":["undetermined"],"read":2,"failureCount":1,"diagnoses":[1,0,0,0]},
+  {"name":"unpositioned_failure","succeeded":1,"failed":0,"readStopped":false,"failures":["undetermined"],"read":1,"failureCount":1,"diagnoses":[1,0,0,0]},
+  {"name":"stopped","succeeded":1,"failed":0,"readStopped":true,"failures":["undetermined"],"read":null,"failureCount":1,"diagnoses":[1,0,0,0]},
+  {"name":"all_classes","succeeded":1,"failed":4,"readStopped":false,"failures":["undetermined","unsupported_format","inconsistent_input_confirmed","implementation_defect_confirmed"],"read":5,"failureCount":4,"diagnoses":[1,1,1,1]}
+]

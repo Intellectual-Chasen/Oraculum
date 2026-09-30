@@ -1,0 +1,4 @@
+02/01/2000 13:00:00.000 +0900 sn=301 evt=ps subEvt=start psGUID={PP} tmid=T9 com="HOST09" csid=S-1-5-21-9 ip=192.0.2.99 psPath="C:\parent.exe"
+02/01/2000 13:00:01.000 +0900 sn=302 evt=ps subEvt=start psGUID={C1} tmid=T9 com="HOST09" csid=S-1-5-21-9 ip=192.0.2.99 psPath="C:\child1.exe" parentGUID={PP}
+02/01/2000 13:00:02.000 +0900 sn=303 evt=ps subEvt=start psGUID={C2} tmid=T9 com="HOST09" csid=S-1-5-21-9 ip=192.0.2.99 psPath="C:\child2.exe" parentGUID={PP}
+02/01/2000 13:00:03.000 +0900 sn=304 evt=ps subEvt=start psGUID={C2} tmid=T9 com="HOST09" csid=S-1-5-21-9 ip=192.0.2.99 psPath="C:\child2.exe" parentGUID={PP}

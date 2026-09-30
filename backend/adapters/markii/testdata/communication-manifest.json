@@ -1,0 +1,233 @@
+{
+  "description": "通信の解析の期待値。値は手作業で確定した。実装の出力を転記していない。",
+  "origin": {
+    "note": "合成した行だけを持つ。ORACULUM_MARKII_SOURCE_DIR が指す入力の検査は、opt-in の検査が行う。"
+  },
+  "subEvents": {
+    "note": "この解析が受け付ける subEvt。5 つ以外の値を持つレコードから観測を作らない。",
+    "singleTable": "受け付ける一覧と意味の状態を 1 つの表が持つ。2 つの一覧に分けると、受け付ける側にだけ値を足したときに状態の判断が既定になり、意味を決めないまま undetermined の観測を返す経路ができる。",
+    "determined": {
+      "values": ["con", "acpt", "dcon"],
+      "reason": "形式が意味を定めている"
+    },
+    "inferred": {
+      "values": ["est", "openUDP"],
+      "reason": "形式が意味を定めず、レコードが持つ欄と前後のレコードから意味を推定した"
+    }
+  },
+  "requiredKeys": {
+    "note": "欠けたレコードから観測を作らず、stage が field_map の失敗を返す key。",
+    "keys": ["sn", "evt", "subEvt", "psGUID", "tmid", "com", "csid", "psPath"],
+    "coverage": "8 key それぞれについて、欠ける形・値が空の形・2 回出る形の 3 つを検査する。1 つの key だけを検査に掛けると、一覧から別の key を外す変更が検査を通ってしまう。",
+    "reason": {
+      "sn": "RecordLocator の sequenceNumber の材料。positionKind が sequence_number のとき必須",
+      "evt": "ObservationKind の raw の 2 要素の 1 つ",
+      "subEvt": "ObservationKind の raw の 2 要素の 1 つで、意味の状態を決める",
+      "psGUID": "ProcessRef の processId の材料",
+      "tmid": "ProcessRef の terminalId の材料",
+      "com": "端末の識別の材料",
+      "csid": "端末の識別の材料",
+      "psPath": "プロセスの実行 file の path。起動のレコードが収集元に無いプロセスでは、通信のレコードの psPath だけが path の材料になる"
+    }
+  },
+  "endpointKeys": {
+    "note": "専用の欄を持つが必須にしない key。openUDP のレコードが 4 つとも持たない。",
+    "keys": ["srcIP", "srcPort", "dstIP", "dstPort"],
+    "absenceForm": "key が出ないレコードでは valueState が item_absent になる。欠測を空文字列で埋めない。",
+    "portForm": "port の文字列を整数へ直さない。原資料の文字列をそのまま持つ。"
+  },
+  "keysWithoutTheirOwnItem": {
+    "note": "専用の欄を持たず、Fields が原文の並び順のまま持つ key。",
+    "port": "openUDP だけが持つ。接続元の port か接続先の port かを確定できない",
+    "recv": "dcon だけが持つ。他の 4 種で埋まらない欄を型に置かない",
+    "send": "dcon だけが持つ",
+    "dstHost": "acpt と openUDP では必ず出ない。接続先は dstIP と dstPort で持つ"
+  },
+  "optionalKeysCompletedInFields": {
+    "note": "当該レコードに key が出ないとき、Fields が valueState を item_absent にした項目で持つ key。adapter が作る。",
+    "keys": ["srcIP", "srcPort", "dstIP", "dstPort", "recv", "send"],
+    "absenceForm": "item_absent の項目は rawText と normalized と derivation を 1 つも持たない。",
+    "count": "6 つの key はどのレコードでも Fields に 1 件ずつ現れる。",
+    "position": "原文に出る key を並べた後ろに、この一覧の順で並ぶ。",
+    "presence": {
+      "communicationConnectLine": {
+        "present": ["srcIP", "srcPort", "dstIP", "dstPort"],
+        "itemAbsent": ["recv", "send"]
+      },
+      "communicationCloseLine": {
+        "present": ["srcIP", "srcPort", "dstIP", "dstPort", "recv", "send"],
+        "itemAbsent": []
+      },
+      "communicationOpenUdpLine": {
+        "present": [],
+        "itemAbsent": ["srcIP", "srcPort", "dstIP", "dstPort", "recv", "send"]
+      }
+    },
+    "limit": "一覧をこの 6 つに限る。srcIP と srcPort と dstIP と dstPort を持たないのは openUDP、recv と send を持つのは dcon である。"
+  },
+  "repeatedKeys": {
+    "note": "同じ key が 1 レコードに 2 回以上出る形の扱い。",
+    "required": "field_map の失敗にする。先勝ちで採ると、どちらの文字列を根拠にしたかが応答から消える。",
+    "optional": "Fields に原文の並び順で 1 件ずつ置く。2 つ目の値を捨てない。"
+  },
+  "records": [
+    {
+      "name": "communicationConnectLine",
+      "form": "必須の 8 key と接続の相手の 4 key をすべて持つ正常な行。subEvt は con",
+      "isCommunication": true,
+      "sequenceNumber": 900300,
+      "lineNumber": 1,
+      "processGuid": "{00000000-1111-2222-3333-555555555555}",
+      "terminalId": "00000000-1111-2222-3333-444444444444",
+      "endpoints": {
+        "sourceIp": { "rawText": "192.0.2.10", "normalized": null, "valueState": "present" },
+        "sourcePort": { "rawText": "50417", "normalized": null, "valueState": "present" },
+        "destIp": { "rawText": "198.51.100.20", "normalized": null, "valueState": "present" },
+        "destPort": { "rawText": "443", "normalized": null, "valueState": "present" }
+      },
+      "eventTime": {
+        "rawText": "02/01/2000 13:30:00.500 +0900",
+        "normalized": "2000-02-01T13:30:00.500+09:00",
+        "normalizedForm": "rfc3339_absolute",
+        "precision": "millisecond",
+        "offsetState": "in_value",
+        "offsetText": "+0900",
+        "clock": "terminal_local",
+        "meaning": "event",
+        "valueState": "present",
+        "instantUTC": "2000-02-01T04:30:00.500Z"
+      },
+      "observationKind": {
+        "rawElementCount": 2,
+        "names": ["evt", "subEvt"],
+        "values": ["net", "con"],
+        "status": "determined"
+      },
+      "fields": {
+        "psPath": {
+          "rawText": "\"C:\\Tools\\agent.exe\"",
+          "normalized": "C:\\Tools\\agent.exe",
+          "valueState": "present",
+          "note": "引用符付きの value は正規化値と導き方を持つ"
+        },
+        "dstPort": {
+          "rawText": "443",
+          "normalized": null,
+          "valueState": "present",
+          "note": "引用符無しの value は正規化値を持たない"
+        }
+      }
+    },
+    {
+      "name": "communicationAcceptLine",
+      "form": "接続の受け入れ。subEvt は acpt",
+      "isCommunication": true,
+      "sequenceNumber": 900301,
+      "observationKind": { "values": ["net", "acpt"], "status": "determined" }
+    },
+    {
+      "name": "communicationCloseLine",
+      "form": "切断。subEvt は dcon。通信量の 2 key を持つ",
+      "isCommunication": true,
+      "sequenceNumber": 900302,
+      "observationKind": { "values": ["net", "dcon"], "status": "determined" },
+      "fields": {
+        "recv": { "rawText": "0", "valueState": "present", "note": "値が 0 の欄。欄が無い状態と別の形にする" },
+        "send": { "rawText": "1024", "valueState": "present" }
+      },
+      "eventTimeMeaning": "event",
+      "note": "切断のレコードでも時刻の意味は event である。接続の開始時刻を持たない"
+    },
+    {
+      "name": "communicationEstablishLine",
+      "form": "接続の成立。subEvt は est",
+      "isCommunication": true,
+      "sequenceNumber": 900303,
+      "observationKind": { "values": ["net", "est"], "status": "inferred" }
+    },
+    {
+      "name": "communicationOpenUdpLine",
+      "form": "UDP の口を開く。接続の相手の 4 key を 1 つも持たず、port を 1 つ持つ",
+      "isCommunication": true,
+      "sequenceNumber": 900304,
+      "observationKind": { "values": ["net", "openUDP"], "status": "inferred" },
+      "endpoints": {
+        "sourceIp": { "valueState": "item_absent", "rawText": null },
+        "sourcePort": { "valueState": "item_absent", "rawText": null },
+        "destIp": { "valueState": "item_absent", "rawText": null },
+        "destPort": { "valueState": "item_absent", "rawText": null }
+      },
+      "fields": { "port": { "rawText": "53", "valueState": "present" } }
+    },
+    {
+      "name": "communicationWithQuotedSourceIpLine",
+      "form": "srcIP が引用符付きである",
+      "isCommunication": true,
+      "sequenceNumber": 900311,
+      "endpoints": {
+        "sourceIp": {
+          "rawText": "\"192.0.2.10\"",
+          "normalized": "192.0.2.10",
+          "valueState": "present",
+          "note": "専用の欄でも引用符を外した正規化値を持つ"
+        }
+      }
+    },
+    {
+      "name": "communicationWithoutPathLine",
+      "form": "必須の psPath を欠く",
+      "isCommunication": true,
+      "failure": {
+        "stage": "field_map",
+        "diagnosisClass": "undetermined",
+        "lineNumber": 1
+      }
+    },
+    {
+      "name": "communicationWithBadSequenceLine",
+      "form": "sn の value が 10 進整数でない",
+      "isCommunication": true,
+      "failure": {
+        "stage": "field_map",
+        "diagnosisClass": "undetermined",
+        "sequenceNumberIsNil": true,
+        "note": "sn を読めない失敗に sequenceNumber の代用の値を入れない"
+      }
+    },
+    {
+      "name": "communicationWithBadHeaderTimeLine",
+      "form": "ヘッダーの日時が日時として解釈できない",
+      "isCommunication": true,
+      "failure": {
+        "stage": "normalize",
+        "diagnosisClass": "undetermined",
+        "sequenceNumber": 900307,
+        "note": "sn は読めているので失敗に載せる"
+      }
+    },
+    {
+      "name": "communicationWithRepeatedKeyLine",
+      "form": "必須の psGUID が 1 レコードに 2 回出る",
+      "isCommunication": true,
+      "failure": {
+        "stage": "field_map",
+        "diagnosisClass": "undetermined",
+        "note": "先勝ちで通知せずに採らない"
+      }
+    },
+    {
+      "name": "communicationWithUnknownSubEventLine",
+      "form": "evt は net だが subEvt が 5 つのいずれでもない",
+      "isCommunication": false,
+      "failure": {
+        "stage": "field_map",
+        "note": "確かめていない形を通知せずに通さない。別のバージョンが足した種別を意味を確かめずに観測にしない"
+      }
+    },
+    {
+      "name": "communicationWithoutSubEventLine / processStartLine",
+      "form": "他の種別の行",
+      "isCommunication": false
+    }
+  ]
+}

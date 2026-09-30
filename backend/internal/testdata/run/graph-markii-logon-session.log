@@ -1,0 +1,4 @@
+02/01/2000 15:00:00.000 +0900 sn=401 evt=os subEvt=evtLog tmid=T1 com="HOST01" csid=S-1-5-21-1 ip=192.0.2.1 channel="Security" evtID=4624 evtRecID=9401 evtSrc="Microsoft-Windows-Security-Auditing" evtUsr="user01" evtLogonID="0x5a01" logonType="Interactive(2)"
+02/01/2000 15:00:00.000 +0900 sn=402 evt=os subEvt=evtLog tmid=T1 com="HOST01" csid=S-1-5-21-1 ip=192.0.2.1 channel="Security" evtID=4672 evtRecID=9402 evtSrc="Microsoft-Windows-Security-Auditing" evtUsr="user01" evtLogonID="0x5A01"
+02/01/2000 15:00:01.000 +0900 sn=403 evt=os subEvt=evtLog tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.9 channel="Security" evtID=4672 evtRecID=9403 evtSrc="Microsoft-Windows-Security-Auditing" evtUsr="user01" evtLogonID="0x5a01"
+02/01/2000 15:00:02.000 +0900 sn=404 evt=os subEvt=evtLog tmid=T1 com="HOST01" csid=S-1-5-21-1 ip=192.0.2.1 channel="Security" evtID=4672 evtRecID=9404 evtSrc="Microsoft-Windows-Security-Auditing" evtUsr="SYSTEM" evtLogonID="0x3e7"

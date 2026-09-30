@@ -1,0 +1,250 @@
+{
+  "provenance": "Synthetic inputs; independently calculated with Python hashlib and struct.pack(>Q); all lengths count UTF-8 bytes, including decimal ordinal.",
+  "versions": [
+    {
+      "name": "base",
+      "parser": "parser",
+      "format": "v1",
+      "revision": "rev1",
+      "settings": "",
+      "want": "26697ca45a30802e3980ba34b9ecaff815d3f6135391dd0315b0ff5ffeec6513"
+    },
+    {
+      "name": "revision",
+      "parser": "parser",
+      "format": "v1",
+      "revision": "rev2",
+      "settings": "",
+      "want": "f7326804e4f9ee65ac5e7af32cf853fa2fe33322b722fa9f61929f9ce95b15b3"
+    },
+    {
+      "name": "unknown",
+      "parser": "parser",
+      "format": "v1",
+      "revision": "",
+      "settings": "",
+      "want": "unknown:efeb190ea1634f4e73766b29ae749daa11ba245acb5724884e84937667787617"
+    },
+    {
+      "name": "settings-one",
+      "parser": "parser",
+      "format": "v1",
+      "revision": "rev1",
+      "settings": "one",
+      "want": "a51b6ed46ebb2ae99735b0a4a4515764b775cb50807219d0b4e20687e0eb2bde"
+    },
+    {
+      "name": "settings-two",
+      "parser": "parser",
+      "format": "v1",
+      "revision": "rev1",
+      "settings": "two",
+      "want": "42986af7ff20f28543790299dbef3dd5c8f1502f88308a8892dbe68f6ecd5f29"
+    },
+    {
+      "name": "parser",
+      "parser": "other",
+      "format": "v1",
+      "revision": "rev1",
+      "settings": "",
+      "want": "427c5a004a05638008fa4bdb5ed0ffc4ea4c86c21e8b7ae76c6f8a3abac979a7"
+    },
+    {
+      "name": "format",
+      "parser": "parser",
+      "format": "v2",
+      "revision": "rev1",
+      "settings": "",
+      "want": "cfceea495ae79e13b40d6b6fa13a0b64cbd455eba21f44fb351e309e455365c6"
+    },
+    {
+      "name": "dirty",
+      "parser": "parser",
+      "format": "v1",
+      "revision": "rev1+dirty",
+      "settings": "",
+      "want": "0c62dfde886eefb6b9bab44f171f9f5dd3bf26271f3ea1c4da37655d51bdd8e5"
+    },
+    {
+      "name": "slash-left",
+      "parser": "a/b",
+      "format": "v1",
+      "revision": "rev",
+      "settings": "",
+      "want": "552a556ae3f5eafc2d437c59566d4d63ad73b6a318d3755fd67cbdde6410c685"
+    },
+    {
+      "name": "slash-right",
+      "parser": "a",
+      "format": "b/v1",
+      "revision": "rev",
+      "settings": "",
+      "want": "cd3a273f273af554acf6421d33e9cea0a58c518f2820eeac3069e094af37de7f"
+    }
+  ],
+  "sources": [
+    {
+      "name": "first",
+      "path": "input/log",
+      "content": "abc",
+      "ordinal": 1,
+      "want": "34e75f76e941ee687efd820e0e9edb882062dbe47200f185847f4965b8817507"
+    },
+    {
+      "name": "second",
+      "path": "input/log",
+      "content": "abc",
+      "ordinal": 2,
+      "want": "bd49ea209b12df1f82fd2ab709a6bd6ae2b99f435f4b82fbcd412e834488261f"
+    },
+    {
+      "name": "plain-left",
+      "path": "ab",
+      "content": "c",
+      "ordinal": 1,
+      "want": "62c802267db563a564e86edaa0c3ff315907638be81c375066a7900b285c6d5d"
+    },
+    {
+      "name": "plain-right",
+      "path": "a",
+      "content": "bc",
+      "ordinal": 1,
+      "want": "b5d92c3dd86e0ed0e0ea2190a80a7d90e2bc2b95b1c62c9bb1a7a48eb85f20ad"
+    },
+    {
+      "name": "slash-left",
+      "path": "a/b",
+      "content": "c",
+      "ordinal": 1,
+      "want": "436ba17a6f647c427ddd961442e9464d64642534771e207e285e352626c2ac21"
+    },
+    {
+      "name": "slash-right",
+      "path": "a",
+      "content": "b/c",
+      "ordinal": 1,
+      "want": "f8e0d01945ae7408e6a36885ffd3c685666d43e8968a1ac9facc225c27b17de0"
+    },
+    {
+      "name": "nul-left",
+      "path": "a\u0000b",
+      "content": "c",
+      "ordinal": 1,
+      "want": "866f71a47a0869937d9fc58d9db003f140ada748d243051c919473e8c3467a54"
+    },
+    {
+      "name": "nul-right",
+      "path": "a",
+      "content": "b\u0000c",
+      "ordinal": 1,
+      "want": "ec71368f3f010d62ba7f0c46243ca9d6c4396d113a6feeb8bb5d257d9e6695ae"
+    },
+    {
+      "name": "unicode-composed",
+      "path": "\u00e9",
+      "content": "abc",
+      "ordinal": 1,
+      "want": "2e200588efd8c70584de044f066cd9a0058bbc2ff7e1082afc0769c8e37cb0da"
+    },
+    {
+      "name": "unicode-decomposed",
+      "path": "e\u0301",
+      "content": "abc",
+      "ordinal": 1,
+      "want": "64055d2a4936968ea406b5cd6bc30a87ef6c7278048267ab11108febd3686e99"
+    }
+  ],
+  "runs": [
+    {
+      "name": "empty",
+      "entries": [],
+      "want": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "multiple",
+      "entries": [
+        {
+          "SourceId": "b",
+          "ParserVersion": "v2"
+        },
+        {
+          "SourceId": "a",
+          "ParserVersion": "v1"
+        }
+      ],
+      "want": "70ee28526c7e60363cd46395a57b23e507f7889fa5f88a1823bc4a1888519860"
+    },
+    {
+      "name": "plain-left",
+      "entries": [
+        {
+          "SourceId": "ab",
+          "ParserVersion": "c"
+        }
+      ],
+      "want": "601d5476e2ccfe2c87a2bba7a322659734a05749d5b5aa781f513e4912db0d5f"
+    },
+    {
+      "name": "plain-right",
+      "entries": [
+        {
+          "SourceId": "a",
+          "ParserVersion": "bc"
+        }
+      ],
+      "want": "3fafa1cf2f19a7c1129beb20cf0983f73a489a221fc0dd2f16d1be292d089205"
+    },
+    {
+      "name": "nul-left",
+      "entries": [
+        {
+          "SourceId": "a\u0000b",
+          "ParserVersion": "c"
+        }
+      ],
+      "want": "fd88127c76c5715a8a012a315fce2dffa370fc1308dd449f75ab731abae04a86"
+    },
+    {
+      "name": "nul-right",
+      "entries": [
+        {
+          "SourceId": "a",
+          "ParserVersion": "b\u0000c"
+        }
+      ],
+      "want": "94bf19dbf4222daac2b73e24729724a5cd04ea2488f9801deeced06e5d97fce6"
+    },
+    {
+      "name": "multiple-cases",
+      "entries": [
+        {
+          "SourceId": "b",
+          "ParserVersion": "v2",
+          "CaseId": "challenge"
+        },
+        {
+          "SourceId": "a",
+          "ParserVersion": "v1",
+          "CaseId": "baseline"
+        }
+      ],
+      "want": "353800648f82a36ae8166b028d73341d431094f9b1cbdb065e8f797d5fcd6104"
+    },
+    {
+      "name": "swapped-cases",
+      "entries": [
+        {
+          "SourceId": "b",
+          "ParserVersion": "v2",
+          "CaseId": "baseline"
+        },
+        {
+          "SourceId": "a",
+          "ParserVersion": "v1",
+          "CaseId": "challenge"
+        }
+      ],
+      "want": "ab75923ec75cc4315082d24df79dbe5747439eaa80ecf98ac004c95c90c32fff"
+    }
+  ]
+}

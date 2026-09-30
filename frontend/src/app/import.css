@@ -1,0 +1,410 @@
+/* 取り込みの操作と入力欄は、探索画面より広い操作領域を持つ。 */
+.text-editor-popover {
+  --control-height: 36px;
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  box-sizing: border-box;
+  overflow: auto;
+}
+.text-editor-target {
+  overflow-wrap: anywhere;
+}
+.text-editor-value textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 8px;
+  font-family: var(--font-mono);
+  resize: vertical;
+}
+.text-editor-apply {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--control-height);
+}
+.text-editor-apply input {
+  width: 18px;
+  height: 18px;
+}
+.import-format-spec {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.import-format-spec button {
+  white-space: normal;
+}
+.stages-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  --control-height: 36px;
+  gap: 16px;
+  padding: 0 24px 24px;
+  box-sizing: border-box;
+}
+
+.import-page-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 0;
+}
+
+.import-page-header h1 {
+  font-size: 22px;
+  flex: 1;
+}
+.stages {
+  min-width: 0;
+}
+.stages > h2 {
+  margin-bottom: 12px;
+}
+.import-stage-heading,
+.import-panel-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.import-stage-heading {
+  justify-content: space-between;
+}
+.import-panel-heading > h4 {
+  margin-right: auto;
+}
+.import-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 12px;
+}
+.import-panel {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.source-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.source-breadcrumbs button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  height: auto;
+}
+.source-browser-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.source-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.source-search input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.source-list-scroll {
+  max-height: 60vh;
+  overflow: auto;
+}
+.source-list-scroll table {
+  width: 100%;
+}
+.source-list-scroll th,
+.source-list-scroll td {
+  padding: 8px 6px;
+}
+.source-list-scroll th:nth-child(2),
+.source-list-scroll td:nth-child(2) {
+  overflow-wrap: anywhere;
+}
+.source-list-scroll tr[aria-selected="true"] {
+  background: var(--accent-soft);
+}
+.source-list-scroll tr[draggable="true"] {
+  cursor: grab;
+}
+.source-list-scroll tr[draggable="true"]:hover {
+  background: var(--surface-2);
+}
+.source-file-name {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+.source-file-name svg {
+  flex-shrink: 0;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.stages-page input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.source-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--control-height);
+  min-height: var(--control-height);
+  cursor: pointer;
+}
+.stages-page .help-popover-trigger {
+  min-width: 28px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+}
+.stages-page .help-popover-trigger svg {
+  width: 18px;
+  height: 18px;
+}
+.import-drop-target {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px dashed var(--line);
+  border-radius: 4px;
+  color: var(--muted);
+  background: var(--surface-2);
+}
+.stages-form[data-drop-active] {
+  border-color: var(--accent);
+}
+.stages-form[data-drop-active] .import-drop-target {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.import-empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--muted);
+}
+.import-notice {
+  margin-bottom: 12px;
+  color: var(--muted);
+}
+.loading-rows-scroll {
+  margin-bottom: 12px;
+}
+.loading-rows-scroll input,
+.loading-rows-scroll select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.loading-rows-scroll details input {
+  margin-top: 4px;
+}
+.loading-rows-scroll summary {
+  min-height: var(--control-height);
+  cursor: pointer;
+  display: list-item;
+  padding-top: 6px;
+  box-sizing: border-box;
+}
+.loading-rows-scroll th,
+.loading-rows-scroll td {
+  border-top: 1px solid var(--line);
+  padding: 8px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.import-upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.import-settings {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.import-case {
+  display: flex;
+  align-items: end;
+  gap: 4px;
+}
+.stages-form .import-case input {
+  display: block;
+  width: 20ch;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+.stages-form .import-process-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.import-submit-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.import-ready-count {
+  color: var(--muted);
+}
+.processing-stage {
+  margin-top: 16px;
+}
+.processing-stage > h3 {
+  margin-bottom: 8px;
+}
+.processing-stage > button {
+  margin-top: 8px;
+}
+
+@media (max-width: 1000px) {
+  .import-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .source-list-scroll {
+    max-height: 40vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .text-editor-popover {
+    --control-height: 44px;
+  }
+  .stages-page {
+    --control-height: 44px;
+    padding-inline: 12px;
+    gap: 12px;
+  }
+  .import-panel {
+    padding: 12px;
+  }
+  .import-workspace {
+    gap: 12px;
+  }
+  .source-list-scroll table {
+    table-layout: fixed;
+  }
+  .source-list-scroll th:first-child {
+    width: 52px;
+  }
+  .source-list-scroll th:nth-child(3),
+  .source-list-scroll td:nth-child(3) {
+    display: none;
+  }
+  .source-list-scroll th:nth-child(4) {
+    width: 35%;
+  }
+  .source-list-scroll button {
+    white-space: normal;
+    height: auto;
+    text-align: left;
+  }
+  .source-list-scroll th,
+  .source-list-scroll td {
+    padding: 6px 4px;
+  }
+  .loading-rows-scroll table,
+  .loading-rows-scroll tbody {
+    display: block;
+  }
+  .loading-rows-scroll colgroup,
+  .loading-rows-scroll thead {
+    display: none;
+  }
+  .loading-rows-scroll tbody[aria-hidden] {
+    display: table-row-group;
+  }
+  .loading-rows-scroll tbody:not([aria-hidden]) tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .loading-rows-scroll th,
+  .loading-rows-scroll td {
+    padding: 0;
+    border-top: 0;
+    min-width: 0;
+  }
+  .loading-rows-scroll th {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+  .loading-rows-scroll td[data-label="入力形式"],
+  .loading-rows-scroll td[data-label="記録した端末の表示名"],
+  .loading-rows-scroll td[data-label="詳しい指定"] {
+    grid-column: 1 / -1;
+  }
+  .loading-rows-scroll td[data-label="入力形式"]::before,
+  .loading-rows-scroll td[data-label="記録した端末の表示名"]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .loading-rows-scroll td[data-label="大きさ (byte)"] {
+    text-align: left;
+    grid-column: 1;
+  }
+  .loading-rows-scroll td[data-label="大きさ (byte)"]::after {
+    content: " byte";
+    color: var(--muted);
+  }
+  .loading-rows-scroll td[data-label="外す"] {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .import-submit-bar button {
+    width: 100%;
+  }
+  .import-settings {
+    align-items: start;
+  }
+  .import-case {
+    width: 100%;
+  }
+  .import-case label {
+    flex: 1;
+  }
+  .stages-form .import-case input {
+    width: 100%;
+  }
+}

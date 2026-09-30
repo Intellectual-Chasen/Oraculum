@@ -1,0 +1,4 @@
+02/01/2000 13:00:00.000 +0900 sn=201 evt=ps subEvt=start psGUID={S1} tmid=T1 com="HOST01" csid=S-1-5-21-1 ip=192.0.2.1 psPath="C:\app.exe"
+02/01/2000 13:00:01.000 +0900 sn=202 evt=ps subEvt=start psGUID={S2} tmid=T2 com="HOST02" csid=S-1-5-21-2 ip=192.0.2.1 psPath="C:\app.exe"
+02/01/2000 13:00:02.000 +0900 sn=203 evt=ps subEvt=start psGUID={S3} tmid=T3 com="HOST03" csid=S-1-5-21-3 ip=192.0.2.50 psPath="C:\app.exe"
+02/01/2000 13:00:03.000 +0900 sn=204 evt=session subEvt=loginR tmid=T3 com="HOST03" csid=S-1-5-21-3 ip=192.0.2.50 usr="alice" usrDomain="AD" srcCom="HOST01" srcIP="192.0.2.1" srcPort="50001"

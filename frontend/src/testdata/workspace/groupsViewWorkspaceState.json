@@ -1,0 +1,159 @@
+{
+  "dockLayout": {
+    "grid": {
+      "root": {
+        "type": "branch",
+        "data": [
+          {
+            "type": "leaf",
+            "data": { "views": ["search"], "activeView": "search", "id": "1" },
+            "size": 100
+          },
+          {
+            "type": "branch",
+            "data": [
+              {
+                "type": "leaf",
+                "data": {
+                  "views": ["graph"],
+                  "activeView": "graph",
+                  "id": "2"
+                },
+                "size": 100
+              },
+              {
+                "type": "leaf",
+                "data": {
+                  "views": [
+                    "record",
+                    "timeline",
+                    "sources",
+                    "terminals",
+                    "terminal",
+                    "ips",
+                    "clusters",
+                    "histogram",
+                    "bookmarks",
+                    "recording"
+                  ],
+                  "activeView": "clusters",
+                  "id": "4"
+                },
+                "size": 100
+              }
+            ],
+            "size": 100
+          },
+          {
+            "type": "leaf",
+            "data": { "views": ["detail"], "activeView": "detail", "id": "3" },
+            "size": 100
+          }
+        ],
+        "size": 100
+      },
+      "width": 100,
+      "height": 100,
+      "orientation": "HORIZONTAL"
+    },
+    "panels": {
+      "search": {
+        "id": "search",
+        "contentComponent": "body",
+        "title": "Search",
+        "renderer": "always"
+      },
+      "graph": {
+        "id": "graph",
+        "contentComponent": "body",
+        "title": "Graph",
+        "renderer": "always"
+      },
+      "detail": {
+        "id": "detail",
+        "contentComponent": "body",
+        "title": "Detail",
+        "renderer": "always"
+      },
+      "record": {
+        "id": "record",
+        "contentComponent": "body",
+        "title": "Record",
+        "renderer": "always"
+      },
+      "timeline": {
+        "id": "timeline",
+        "contentComponent": "body",
+        "title": "Timeline",
+        "renderer": "onlyWhenVisible"
+      },
+      "sources": {
+        "id": "sources",
+        "contentComponent": "body",
+        "title": "Artifacts",
+        "renderer": "onlyWhenVisible"
+      },
+      "terminals": {
+        "id": "terminals",
+        "contentComponent": "body",
+        "title": "Hosts",
+        "renderer": "onlyWhenVisible"
+      },
+      "terminal": {
+        "id": "terminal",
+        "contentComponent": "body",
+        "title": "Host Detail",
+        "renderer": "onlyWhenVisible"
+      },
+      "ips": {
+        "id": "ips",
+        "contentComponent": "body",
+        "title": "IPs",
+        "renderer": "onlyWhenVisible"
+      },
+      "clusters": {
+        "id": "clusters",
+        "contentComponent": "body",
+        "title": "Groups",
+        "renderer": "onlyWhenVisible"
+      },
+      "histogram": {
+        "id": "histogram",
+        "contentComponent": "body",
+        "title": "Histogram",
+        "renderer": "onlyWhenVisible"
+      },
+      "bookmarks": {
+        "id": "bookmarks",
+        "contentComponent": "body",
+        "title": "Bookmarks",
+        "renderer": "always"
+      },
+      "recording": {
+        "id": "recording",
+        "contentComponent": "body",
+        "title": "Time & Host",
+        "renderer": "always"
+      }
+    },
+    "activeGroup": "4"
+  },
+  "recordFilter": {},
+  "comparedSourceId": "",
+  "searchTerms": { "contains": ["example.test"], "excludes": [] },
+  "matchConditions": { "conditions": [{ "conditionKey": "user" }] },
+  "nodeScope": { "enabled": false, "depth": 1 },
+  "history": { "places": [], "index": -1 },
+  "bookmarks": [],
+  "graph": {
+    "criteria": {
+      "expansion": { "kind": "fit", "unitLimit": 2000 },
+      "unfolds": ["g:1:0"],
+      "expands": ["n:1"],
+      "depth": 1
+    },
+    "view": { "kind": "auto" },
+    "drawLimit": 2000,
+    "selected": { "kind": "group", "id": "g:1:0" }
+  }
+}
