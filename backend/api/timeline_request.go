@@ -16,6 +16,8 @@ import (
 type timelineRequest struct {
 	records recordConditionsRequest
 	searchExpressionRequest
+	// textSearch は値・欄の文字列条件である。近傍探索の経路判定には使用しない。
+	textSearch pipeline.GraphQuery
 	// nodeIds は起点のノードの識別子である。空のときはノードで絞らない。
 	nodeIds []string
 	// depth は起点から辿る段数である。nodeIds を与えた要求だけが持つ。
@@ -36,7 +38,7 @@ const (
 // query は要求を pipeline の時系列の要求へ直す。
 func (r timelineRequest) query() pipeline.TimelineQuery {
 	return pipeline.TimelineQuery{
-		RecordFilter: r.records.recordFilter(), Expression: r.searchExpression,
+		RecordFilter: r.records.recordFilter(), TextSearch: r.textSearch,
 		NodeIds: r.nodeIds, Depth: r.depth,
 		AccountNodeId: r.accountNodeId,
 	}
@@ -66,6 +68,11 @@ func parseTimelineRequest(r *http.Request) (timelineRequest, *core.ApiError) {
 	if apiError := request.readSearchExpression(query); apiError != nil {
 		return timelineRequest{}, apiError
 	}
+	textSearch := readTextSearchQuery(query)
+	if err := textSearch.Validate(); err != nil {
+		return timelineRequest{}, invalidRequestError(err, nil)
+	}
+	request.textSearch = textSearchOf(textSearch, request.searchExpression)
 	if err := readTimelineOrigins(query, &request); err != nil {
 		return timelineRequest{}, invalidRequestError(err, nil)
 	}
@@ -149,12 +156,15 @@ func checkTimelineParameterNames(query url.Values) error {
 		filterUnitParam: {}, matchConditionParam: {}, caseParam: {}, terminalParam: {}, sourceParam: {},
 		nodeIdParam: {}, depthParam: {}, accountNodeIdParam: {}, findParam: {}, findCaseSensitiveParam: {},
 		searchExpressionParam: {},
+		valueContainsParam:    {}, valueExcludesParam: {}, valueFieldParam: {},
+		fieldContainsParam: {}, fieldEqualsParam: {},
 	}
 	for name, values := range query {
 		if _, ok := known[name]; !ok {
 			return errors.New("unsupported query parameter")
 		}
-		if len(values) != 1 && !repeatedRequestItem(name) {
+		if len(values) != 1 && !repeatedRequestItem(name) &&
+			name != fieldContainsParam && name != fieldEqualsParam {
 			return errors.New("query parameter must occur once")
 		}
 	}
@@ -192,5 +202,5 @@ func checkTimelineEmptyValues(query url.Values) error {
 			return errors.New(name + " must not be empty")
 		}
 	}
-	return nil
+	return checkTextSearchEmptyValues(query)
 }

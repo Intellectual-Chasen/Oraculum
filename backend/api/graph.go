@@ -188,11 +188,11 @@ func (h graphHandler) buildResponse(
 
 // unknownFieldsOf は、検索式の比較が指した欄のうち、どのノードの属性にも無い欄の名前を返す。
 func (h graphHandler) unknownFieldsOf(request graphRequest) []string {
-	if request.searchExpression == nil {
+	if request.textSearch.Expression == nil {
 		return nil
 	}
 	var unknown []string
-	for _, field := range request.searchExpression.ComparedFields() {
+	for _, field := range request.textSearch.Expression.ComparedFields() {
 		name := string(field.Semantic) + field.Name
 		if !slices.Contains(unknown, name) && !h.graph.ObservesField(field.Semantic, field.Name) {
 			unknown = append(unknown, name)

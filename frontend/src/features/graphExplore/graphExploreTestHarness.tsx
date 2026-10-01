@@ -7,6 +7,7 @@ import { noSearchTerms, type SearchTerms } from "@/shared/lib/searchTerms";
 import { candidateResponse } from "@/testdata/attackCandidates/candidateResponse";
 import { eventKindsResponseJson } from "@/testdata/eventKinds/eventKindsResponse";
 import {
+  accountNodeDetailResponseJson,
   graphResponseJson,
   limitedGraphResponseJson,
   nodeDetailResponseJson,
@@ -202,6 +203,14 @@ export function stubFetch(
   eventKindsJson: unknown = eventKindsResponseJson(),
 ) {
   const mock = vi.fn(async (input: string, _init?: RequestInit) => {
+    if (input.startsWith("/api/v0/account-relations")) {
+      return respond({
+        origin: accountNodeDetailResponseJson().node,
+        groups: [],
+        selectedRecordCount: 0,
+        periodUnjudgedRecordCount: 0,
+      });
+    }
     if (input.startsWith("/api/v0/attack-candidates")) {
       return respond(candidateResponse([]));
     }

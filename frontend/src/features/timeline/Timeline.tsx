@@ -101,6 +101,16 @@ type TimelineProps = {
   terminal: string | undefined;
   /** 根拠のレコードを絞る収集元の sourceId。上位の画面が持つ。 */
   sources?: readonly string[] | undefined;
+  /** 検索で値に含むことを求める文字列。上位の画面が持つ。 */
+  valueContains?: readonly string[] | undefined;
+  /** 検索で値に含まないことを求める文字列。上位の画面が持つ。 */
+  valueExcludes?: readonly string[] | undefined;
+  /** 値に文字列を当てる欄。上位の画面が持つ。 */
+  valueField?: string | undefined;
+  /** 検索で欄と値の部分一致を求める組。上位の画面が持つ。 */
+  fieldContains?: readonly string[] | undefined;
+  /** 検索で欄と値の完全一致を求める組。上位の画面が持つ。 */
+  fieldEquals?: readonly string[] | undefined;
   /**
    * 根拠のレコードを絞る検索式。上位の画面が持ち、グラフの探索と同じ文字列を渡す。出ない場合は
    * 式で絞らない。
@@ -183,6 +193,11 @@ export const Timeline = memo(function Timeline({
   caseId,
   terminal,
   sources,
+  valueContains,
+  valueExcludes,
+  valueField,
+  fieldContains,
+  fieldEquals,
   searchExpression,
   nearNodeId,
   accountNodeId,
@@ -234,6 +249,11 @@ export const Timeline = memo(function Timeline({
       caseId,
       terminal,
       sources,
+      valueContains,
+      valueExcludes,
+      valueField,
+      fieldContains,
+      fieldEquals,
       searchExpression,
       near:
         nearNodeId === undefined
@@ -252,6 +272,11 @@ export const Timeline = memo(function Timeline({
       caseId,
       terminal,
       sources,
+      valueContains,
+      valueExcludes,
+      valueField,
+      fieldContains,
+      fieldEquals,
       searchExpression,
       nearNodeId,
       accountNodeId,

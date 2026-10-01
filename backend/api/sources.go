@@ -163,6 +163,12 @@ func buildRoutes(
 			return timelineHandler{graph: g, result: result}
 		},
 	})
+	mux.Handle(accountRelationsPattern, matchSelectingHandler{
+		graphs: observed,
+		build: func(g pipeline.Graph, _ pipeline.ImportResult) http.Handler {
+			return accountRelationsHandler{graph: g, sigma: sigma}
+		},
+	})
 	// ノードの一覧は観測したノードとエッジの根拠だけを数えるため、時系列と同じく観測の層を読む。
 	mux.Handle(nodeSummariesPattern, matchSelectingHandler{
 		graphs: observed,

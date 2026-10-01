@@ -18,6 +18,9 @@ import {
 } from "@/testdata/conditionInput";
 import { eventKindsResponseJson } from "@/testdata/eventKinds/eventKindsResponse";
 import {
+  accountNodeDetailResponseJson,
+  accountNodeId,
+  accountRecordGraphResponseJson,
   graphResponseJson,
   nodeDetailResponseJson,
   processNodeId,
@@ -26,10 +29,12 @@ import {
 } from "@/testdata/graph/graphResponse";
 import { jsonResponse } from "@/testdata/http";
 import { apiErrorJson } from "@/testdata/sources/sourcesResponse";
+import { ValueActionsForTest } from "@/testdata/valueActions";
 import {
   type FetchMock,
   figureRequests,
   findNodeList,
+  GraphExploreHarness,
   GraphExploreWithTerminals,
   initialFigureRequest,
   lastFigureRequest,
@@ -135,6 +140,58 @@ async function renderLoaded(mock: FetchMock = stubFetch()) {
   await act(async () => {});
   return mock;
 }
+
+test("アカウントから相手候補を開くと、Graph が個別レコードを初回に描かず役割付き集計を取得する", async () => {
+  const mock = stubFetch(
+    accountRecordGraphResponseJson(),
+    accountNodeDetailResponseJson(),
+  );
+  const onShowAccountRecords = vi.fn();
+  const account = {
+    id: accountNodeId,
+    label: "user02",
+    kind: "account" as const,
+  };
+  render(
+    <ValueActionsForTest onSelectRecord={() => {}}>
+      <GraphExploreHarness
+        focusRequest={{ node: account }}
+        onShowAccountRecords={onShowAccountRecords}
+        onSelectRecord={() => {}}
+        selectedEdgeId={undefined}
+        onSelectEdge={() => {}}
+        assertions={() => null}
+        layout={stackPanes}
+      />
+    </ValueActionsForTest>,
+  );
+
+  fireEvent.click(
+    await screen.findByRole("button", {
+      name: "このアカウントを名指した記録",
+    }),
+  );
+
+  await waitFor(() => {
+    const request = mock.mock.calls.find(([input]) =>
+      String(input).startsWith("/api/v0/account-relations?"),
+    );
+    expect(request).toBeDefined();
+    const url = new URL(String(request?.[0]), "http://localhost");
+    expect(url.pathname).toBe("/api/v0/account-relations");
+    expect(url.searchParams.getAll("edgeKind")).toEqual([
+      "record_subject_account",
+      "record_target_account",
+      "record_names_object",
+    ]);
+    expect(url.searchParams.get("accountNodeId")).toBe(accountNodeId);
+    expect(url.searchParams.get("counterpartId")).toBeNull();
+  });
+  expect(
+    screen.getByRole("img", { name: /0 組の相手への関係図/ }),
+  ).toBeInTheDocument();
+  expect(onShowAccountRecords).toHaveBeenCalledWith(account);
+});
 
 test("条件が無い最初のグラフは端末と IP アドレスを出し、グラフに出す対象の自動が端末と IP アドレスを選んだことを出す", async () => {
   const mock = await renderLoaded();

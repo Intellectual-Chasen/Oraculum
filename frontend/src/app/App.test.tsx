@@ -37,6 +37,9 @@ import {
 } from "@/testdata/conditionInput";
 import { eventKindsResponseJson } from "@/testdata/eventKinds/eventKindsResponse";
 import {
+  accountNodeDetailResponseJson,
+  accountNodeId,
+  accountRecordGraphResponseJson,
   edgeDetailResponseJson,
   graphResponseJson,
   invisibleCharacterGraphResponseJson,
@@ -155,6 +158,7 @@ function stubFetch(
   recordJson: unknown = hostALogRecordResponseJson(),
   assertionsJson: unknown = emptyAssertionsResponseJson(),
   edgeJson: unknown = edgeDetailResponseJson(),
+  nodeJson: unknown = nodeDetailResponseJson(),
 ) {
   const mock = vi.fn(async (input: string, _init?: RequestInit) => {
     if (input.startsWith("/api/v0/sources")) {
@@ -172,6 +176,14 @@ function stubFetch(
     if (input.startsWith("/api/v0/event-kinds")) {
       return jsonResponse(200, eventKindsResponseJson());
     }
+    if (input.startsWith("/api/v0/account-relations")) {
+      return jsonResponse(200, {
+        origin: accountRecordGraphResponseJson().nodes[0],
+        groups: [],
+        selectedRecordCount: 0,
+        periodUnjudgedRecordCount: 0,
+      });
+    }
     if (input.startsWith("/api/v0/records")) {
       return jsonResponse(200, recordJson);
     }
@@ -185,7 +197,7 @@ function stubFetch(
       });
     }
     if (input.startsWith("/api/v0/nodes/")) {
-      return jsonResponse(200, nodeDetailResponseJson());
+      return jsonResponse(200, nodeJson);
     }
     if (input.startsWith("/api/v0/edges/")) {
       return jsonResponse(200, edgeJson);
@@ -205,6 +217,61 @@ function stubFetch(
 const sourcesView = "Artifacts";
 const recordingView = "Time & Host";
 const timelineView = "Timeline";
+
+test("アカウントの記録を開くと Timeline と Graph の両方をそのアカウントへ絞る", async () => {
+  const mock = stubFetch(
+    sourcesResponseJson(),
+    accountRecordGraphResponseJson(),
+    hostALogRecordResponseJson(),
+    emptyAssertionsResponseJson(),
+    edgeDetailResponseJson(),
+    accountNodeDetailResponseJson(),
+  );
+  render(<App />);
+  await findNodeList();
+
+  fireEvent.click(
+    await screen.findByRole("button", {
+      name: "アカウント user02 の詳細を開く",
+    }),
+  );
+  fireEvent.click(
+    await screen.findByRole("button", {
+      name: "このアカウントを名指した記録",
+    }),
+  );
+
+  await waitFor(() => {
+    const timeline = mock.mock.calls
+      .map(([path]) => path)
+      .filter((path) => path.startsWith("/api/v0/timeline?"))
+      .at(-1);
+    expect(
+      new URL(timeline ?? "", "http://localhost").searchParams.get(
+        "accountNodeId",
+      ),
+    ).toBe(accountNodeId);
+    const relationRequest = mock.mock.calls
+      .map(([path]) => path)
+      .filter((path) => path.startsWith("/api/v0/account-relations?"))
+      .at(-1);
+    const relationQuery = new URL(relationRequest ?? "", "http://localhost")
+      .searchParams;
+    expect(relationQuery.get("accountNodeId")).toBe(accountNodeId);
+    expect(relationQuery.getAll("edgeKind")).toEqual([
+      "record_subject_account",
+      "record_target_account",
+      "record_names_object",
+    ]);
+  });
+  expect(
+    screen.getByRole("button", { name: "通常の時系列へ戻る" }),
+  ).toBeTruthy();
+  expect(
+    screen.getByRole("img", { name: /0 組の相手への関係図/ }),
+  ).toBeTruthy();
+  expect(pairText("アカウント")).toBe("アカウント: user02");
+});
 
 /** 画面の「名前: 値」の組のうち、最初に見つかった name の組の文字列。 */
 function pairText(name: string): string | undefined {
@@ -491,6 +558,38 @@ test("検索の画面で適用した検索式を、時系列の要求にも載�
   );
   await waitFor(() =>
     expect(lastTimeline().has("searchExpression")).toBe(false),
+  );
+});
+
+test("検索の含む条件を時系列の要求へ載せ、変更と解除を反映する", async () => {
+  const mock = stubFetch();
+  render(<App />);
+  await findNodeList();
+  openView(timelineView);
+  const lastTimeline = () =>
+    new URL(
+      mock.mock.calls
+        .map((call) => call[0])
+        .filter((path) => path.startsWith("/api/v0/timeline"))
+        .at(-1) ?? "",
+      "http://localhost",
+    ).searchParams;
+  await screen.findByRole("table", { name: "収集元ごとの記録期間" });
+  expect(lastTimeline().has("valueContains")).toBe(false);
+
+  addCondition("含む", { 含む文字列: "alpha-token" });
+  await waitFor(() =>
+    expect(lastTimeline().getAll("valueContains")).toEqual(["alpha-token"]),
+  );
+
+  fireEvent.click(
+    screen.getByRole("button", { name: "含む文字列 alpha-token を削除" }),
+  );
+  await waitFor(() => expect(lastTimeline().has("valueContains")).toBe(false));
+
+  addCondition("含む", { 含む文字列: "beta-token" });
+  await waitFor(() =>
+    expect(lastTimeline().getAll("valueContains")).toEqual(["beta-token"]),
   );
 });
 

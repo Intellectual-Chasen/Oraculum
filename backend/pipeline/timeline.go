@@ -15,12 +15,8 @@ import (
 type TimelineQuery struct {
 	// RecordFilter は根拠のレコードを絞る条件である。
 	RecordFilter
-	// Expression は検索式である。式を満たすレコードだけを並べる。nil は式で絞らない。
-	//
-	// **判定の対象はレコードのノードの属性である。** グラフの要求の Expression と同じく 1 件の
-	// レコードの欄に対する判定である。レコードのノードを持たないレコードは、判定する欄が無い
-	// ため、式を与えた要求の結果に入らない。**起点から辿るエッジは式で絞らない。**
-	Expression *SearchExpression
+	// TextSearch はレコードの値と欄に対する文字列条件である。NodeIds の近傍を辿る条件には使わない。
+	TextSearch GraphQuery
 	// NodeIds は起点のノードの識別子である。空のときはノードで絞らない。
 	//
 	// **与えたときは、起点から Depth の段数で辿ったエッジと起点のノードの根拠のレコードだけを
@@ -181,14 +177,11 @@ func (g Graph) Timeline(query TimelineQuery) Timeline {
 		Entries:         make([]core.TimelineEntry, 0, len(g.records)),
 		SourceCoverages: g.sourceCoverages(query),
 	}
+	textSearch := g.withResolvedFieldNames(query.TextSearch)
 	var rows, localRows []timelineRow
 	matched := make(map[string]int64, len(g.recordings))
 	near := g.recordsNearNodes(query)
 	accountRecords := g.accountRecords(query.AccountNodeId)
-	expression := query.Expression
-	if expression != nil {
-		expression = expression.withExactNames(g.hasFieldNamed).withNamedAccounts(g)
-	}
 	judgesPeriod := query.TimeFrom != nil || query.TimeTo != nil
 	periodless := query.withoutPeriod()
 	for at, record := range g.records {
@@ -201,7 +194,8 @@ func (g Graph) Timeline(query TimelineQuery) Timeline {
 		if accountRecords != nil && len(accountRecords[at]) == 0 {
 			continue
 		}
-		if expression != nil && (!record.hasRecordNode || !expression.matches(g.nodes[record.recordNode])) {
+		if textSearch.SearchesText() &&
+			(!record.hasRecordNode || !textSearch.textMatches(g.nodes[record.recordNode])) {
 			continue
 		}
 		passed := false

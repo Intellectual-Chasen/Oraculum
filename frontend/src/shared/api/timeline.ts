@@ -38,6 +38,16 @@ export type TimelineRequest = {
   terminal?: string;
   /** 根拠のレコードを絞る収集元の sourceId。空か出ない場合は収集元で絞らない。 */
   sources?: readonly string[];
+  /** どの値も含むことを求める文字列。 */
+  valueContains?: readonly string[];
+  /** どの値も含まないことを求める文字列。 */
+  valueExcludes?: readonly string[];
+  /** valueContains と valueExcludes を当てる欄。文字列条件がある場合だけ要求に載せる。 */
+  valueField?: string;
+  /** 欄と文字列の組。値が欄に文字列を含むことを求める。 */
+  fieldContains?: readonly string[];
+  /** 欄と文字列の組。値全体が文字列と等しいことを求める。 */
+  fieldEquals?: readonly string[];
   /**
    * 欄・演算子・論理・括弧で書いた検索式。式に合うレコードだけを並べる。グラフの探索と
    * 同じ文字列を与える。空白だけの式は要求に載せない。
@@ -89,6 +99,16 @@ export async function fetchTimeline(
       case: request.caseId,
       terminal: request.terminal,
       source: nonEmpty(request.sources),
+      valueContains: nonEmpty(request.valueContains),
+      valueExcludes: nonEmpty(request.valueExcludes),
+      valueField:
+        (request.valueContains?.length ?? 0) +
+          (request.valueExcludes?.length ?? 0) >
+        0
+          ? request.valueField
+          : undefined,
+      fieldContains: nonEmpty(request.fieldContains),
+      fieldEquals: nonEmpty(request.fieldEquals),
       searchExpression: expressionParam(request.searchExpression),
       nodeId: request.near?.nodeId,
       accountNodeId: request.accountNodeId,

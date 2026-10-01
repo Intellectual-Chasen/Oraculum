@@ -383,6 +383,66 @@ func TestTimelineNarrowsTheListToTheRecordsNearTheNode(t *testing.T) {
 	}
 }
 
+// 時系列の文字列条件はレコードの粒度のグラフと同じレコードを残す。
+func TestTimelineAppliesTheSameTextSearchAsRecordGraph(t *testing.T) {
+	graph := graphOf(t)
+	for _, testCase := range []struct {
+		name   string
+		search GraphQuery
+	}{
+		{"含む", GraphQuery{ValueContains: []string{"app.exe"}}},
+		{"含まない", GraphQuery{ValueExcludes: []string{"app.exe"}}},
+		{"欄の指定", GraphQuery{ValueContains: []string{"app.exe"}, ValueFieldName: "psPath"}},
+		{"欄の部分一致", GraphQuery{FieldContains: []FieldTerm{{Name: "psPath", Contains: "app.exe"}}}},
+		{"欄の完全一致", GraphQuery{FieldContains: []FieldTerm{{Name: "dstPort", Contains: "8080", WholeValue: true}}}},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			graphQuery := testCase.search
+			graphQuery.Depth = 0
+			graphQuery.Granularity = core.GraphGranularityRecord
+			graphQuery.NodeKinds = []core.NodeKind{core.NodeKindRecord}
+			graphQuery.RecordSummary = true
+			want := make([]string, 0)
+			for _, node := range graph.Query(graphQuery).Nodes {
+				if node.Record == nil {
+					t.Fatalf("record node %q has no summary", node.Id)
+				}
+				ref := node.Record.RecordRef
+				want = append(want, ref.SourceId+" "+ref.RecordRawTextRef)
+			}
+			slices.Sort(want)
+
+			timeline := graph.Timeline(TimelineQuery{TextSearch: testCase.search})
+			got := timelineKeys(timeline)
+			slices.Sort(got)
+			if !slices.Equal(got, want) {
+				t.Errorf("the timeline listed %v, want the graph records %v", got, want)
+			}
+		})
+	}
+}
+
+// 時系列の文字列条件は、起点から辿るエッジの選択に作用しない。
+func TestTimelineTextSearchDoesNotChangeNearRecordSelection(t *testing.T) {
+	graph := graphOf(t)
+	origin := -1
+	for index, node := range graph.nodes {
+		if node.key.Kind == core.NodeKindProcess && len(graph.adjacency[index].outgoing) > 0 {
+			origin = index
+			break
+		}
+	}
+	if origin < 0 {
+		t.Fatal("the fixture has no process with a relation")
+	}
+	plain := TimelineQuery{NodeIds: []string{graph.nodes[origin].id}, Depth: 1}
+	filtered := plain
+	filtered.TextSearch = GraphQuery{ValueContains: []string{"app.exe"}}
+	if got, want := graph.recordsNearNodes(filtered), graph.recordsNearNodes(plain); !slices.Equal(got, want) {
+		t.Fatal("the text condition changed the records selected by near-edge traversal")
+	}
+}
+
 // 母集団は Selection ごとに違う。matched は絞り込みを通った根拠だけを見る。
 func TestMatchedNodeCarriesOnlyTheTerminalsOfTheFilteredEvidence(t *testing.T) {
 	graph := graphOf(t)

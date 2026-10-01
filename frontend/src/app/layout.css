@@ -857,6 +857,42 @@ body,
   color: var(--muted);
 }
 
+.account-relations-figure {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 12px;
+}
+
+.account-relations-figure > svg,
+.account-relations-record-figure > svg {
+  display: block;
+  width: 100%;
+  min-width: 650px;
+  height: auto;
+}
+
+.account-relations-record-figure {
+  overflow: auto;
+  max-height: 480px;
+}
+
+.account-relation-list {
+  padding-left: 20px;
+}
+
+.account-relation-list > li {
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.account-relation-list dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 10px;
+  overflow-wrap: anywhere;
+}
+
 /* 図の上の 1 行。図が何を描いているかの値の組と、図の表示を終える操作を置く。 */
 .figure-bar {
   display: flex;

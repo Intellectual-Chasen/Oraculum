@@ -64,6 +64,53 @@ func TestGraphMatchesTheWholeValueOfAFieldEqualsPair(t *testing.T) {
 	}
 }
 
+// 同じ文字列条件を使ったグラフと時系列は、同じレコードを返す。
+func TestGraphAndTimelineApplyTheSameTextFilters(t *testing.T) {
+	handler := graphHandler(t)
+	for _, testCase := range []struct {
+		name  string
+		query string
+	}{
+		{"含む", "valueContains=app.exe"},
+		{"含まない", "valueExcludes=app.exe"},
+		{"フィールド指定", "valueContains=app.exe&valueField=psPath"},
+		{"フィールド内の部分一致", "fieldContains=psPath%3Dapp.exe"},
+		{"フィールド内の完全一致", "fieldEquals=dstPort%3D8080"},
+		{"条件の組み合わせ", "valueContains=app.exe&fieldEquals=dstPort%3D8080"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			graph := decodeGraph(t, handler, recordsQuery+"&"+testCase.query)
+			timeline := decodeTimeline(t, handler, testCase.query)
+			listed := make([]string, 0, len(timeline.Entries))
+			for _, entry := range timeline.Entries {
+				listed = append(listed, entry.RecordRef.SourceId+" "+entry.RecordRef.RecordRawTextRef)
+			}
+			slices.Sort(listed)
+			if want := matchedRecordKeys(t, graph); !slices.Equal(listed, want) {
+				t.Errorf("the timeline listed %v, want the graph records %v", listed, want)
+			}
+		})
+	}
+}
+
+// 時系列は文字列条件の値の形と組み合わせをグラフと同じ検証で退ける。
+func TestTimelineValidatesTextFiltersLikeGraph(t *testing.T) {
+	handler := graphHandler(t)
+	for _, query := range []string{
+		"valueContains=",
+		"valueField=psPath",
+		"fieldContains=psPath",
+		"fieldEquals=psPath%3D",
+	} {
+		graphError := requestGraphError(t, handler, recordsQuery+"&"+query, http.StatusBadRequest)
+		timelineError := requestTimelineError(t, handler, query, http.StatusBadRequest)
+		if graphError.Message != timelineError.Message {
+			t.Errorf("query %q graph rejected it as %q, timeline rejected it as %q",
+				query, graphError.Message, timelineError.Message)
+		}
+	}
+}
+
 func TestGraphRejectsABrokenRangeOrAFieldWithoutTerms(t *testing.T) {
 	handler := graphHandler(t)
 	for _, query := range []string{

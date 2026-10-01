@@ -50,6 +50,11 @@ function renderTimeline(
     eventAction: string | undefined;
     caseId: CaseId | undefined;
     terminal: string | undefined;
+    valueContains: readonly string[] | undefined;
+    valueExcludes: readonly string[] | undefined;
+    valueField: string | undefined;
+    fieldContains: readonly string[] | undefined;
+    fieldEquals: readonly string[] | undefined;
     searchExpression: string | undefined;
   }> = {},
 ) {
@@ -61,6 +66,11 @@ function renderTimeline(
       eventAction={props.eventAction}
       caseId={props.caseId}
       terminal={props.terminal}
+      valueContains={props.valueContains}
+      valueExcludes={props.valueExcludes}
+      valueField={props.valueField}
+      fieldContains={props.fieldContains}
+      fieldEquals={props.fieldEquals}
       searchExpression={props.searchExpression}
       onSelectRecord={() => {}}
       dataVersion={0}
@@ -463,6 +473,37 @@ test("検索式を要求の searchExpression に文字列のまま載せ、応�
   await waitFor(() => expect(pairText("検索式")).toBe(`検索式: ${expression}`));
   const url = new URL(String(mock.mock.calls.at(-1)?.[0]), "http://localhost");
   expect(url.searchParams.getAll("searchExpression")).toEqual([expression]);
+});
+
+test("文字列条件を時系列の要求に複数回の項目として載せる", async () => {
+  const mock = stubFetch();
+  renderTimeline({
+    valueContains: ["alpha", "beta"],
+    valueExcludes: ["gamma"],
+    valueField: "CommandLine",
+    fieldContains: ["Image=tool.exe", "Account=name"],
+    fieldEquals: ["EventId=42"],
+  });
+
+  await screen.findByRole("table", { name: coverageTableName });
+  const url = new URL(String(mock.mock.calls.at(-1)?.[0]), "http://localhost");
+  expect(url.searchParams.getAll("valueContains")).toEqual(["alpha", "beta"]);
+  expect(url.searchParams.getAll("valueExcludes")).toEqual(["gamma"]);
+  expect(url.searchParams.getAll("valueField")).toEqual(["CommandLine"]);
+  expect(url.searchParams.getAll("fieldContains")).toEqual([
+    "Image=tool.exe",
+    "Account=name",
+  ]);
+  expect(url.searchParams.getAll("fieldEquals")).toEqual(["EventId=42"]);
+});
+
+test("文字列条件が無いとき欄の指定だけを時系列の要求に載せない", async () => {
+  const mock = stubFetch();
+  renderTimeline({ valueField: "CommandLine" });
+
+  await screen.findByRole("table", { name: coverageTableName });
+  const url = new URL(String(mock.mock.calls.at(-1)?.[0]), "http://localhost");
+  expect(url.searchParams.has("valueField")).toBe(false);
 });
 
 test("空白だけの検索式を要求に載せない", async () => {

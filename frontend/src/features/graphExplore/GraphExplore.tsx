@@ -14,6 +14,7 @@ import {
   type RecordFilterCriteria,
 } from "@/shared/api/graph";
 import type { MatchConditionSelection } from "@/shared/api/matchConditions";
+import type { AccountRelationKey } from "@/shared/contracts/accountRelations";
 import type { CaseId } from "@/shared/contracts/cases";
 import type { RecordLocator, RequestedTime } from "@/shared/contracts/common";
 import type { EventKind } from "@/shared/contracts/eventKinds";
@@ -56,6 +57,10 @@ import { RawText } from "@/shared/ui/RawText";
 import { StatusLabel } from "@/shared/ui/StatusLabel";
 import { Tabs } from "@/shared/ui/Tabs";
 import { useCopyText } from "@/shared/ui/useCopyText";
+import {
+  AccountRelationsDetail,
+  AccountRelationsFigure,
+} from "./AccountRelationsView";
 import { AttackCandidateList } from "./AttackCandidateList";
 import { originsOf, shownNodeId, useAccountMerge } from "./accountMerge";
 import {
@@ -127,6 +132,7 @@ import {
   valueCountsSummaryPairs,
   withBackdrop,
 } from "./subgraph";
+import { useAccountRelations } from "./useAccountRelations";
 import { useAttackCandidates } from "./useAttackCandidates";
 import { useEventKinds } from "./useEventKinds";
 import { useNodeDetail } from "./useNodeDetail";
@@ -144,6 +150,12 @@ import {
 // エッジを 1 回の要求で返した。検索の条件を足すと、条件から選んだ粒度へ替わる (searchView.ts), 端末の数が上限を
 // 超える資料を取り込んだときに見直す
 const initialCriteria: LocalSubgraphCriteria = { depth: 1 };
+
+const accountRecordEdgeKinds: readonly EdgeKind[] = [
+  "record_subject_account",
+  "record_target_account",
+  "record_names_object",
+];
 
 /**
  * 本機能が持つ部分グラフの条件。
@@ -1221,6 +1233,12 @@ export function GraphExplore({
       ? ruleHighlight.highlight
       : recordHighlight;
   const [localCriteria, setLocalCriteria] = useState(initialCriteria);
+  const [accountRelationRoot, setAccountRelationRoot] = useState<
+    NodeRef | undefined
+  >(undefined);
+  const [selectedAccountRelation, setSelectedAccountRelation] = useState<
+    AccountRelationKey | undefined
+  >(undefined);
   const [view, setView] = useState<ViewChoice>(autoView);
   const [drawLimit, setDrawLimit] = useState<DrawLimit>(defaultDrawLimit);
   const [layoutSettings, setLayoutSettings] = useState(defaultLayoutSettings);
@@ -1283,6 +1301,8 @@ export function GraphExplore({
       next: Exploration | undefined,
       kept?: Extract<Exploration, { kind: "neighbours" }>,
     ) => {
+      setAccountRelationRoot(undefined);
+      setSelectedAccountRelation(undefined);
       setInfluence(undefined);
       setExplorationStart(
         next === undefined
@@ -1313,7 +1333,10 @@ export function GraphExplore({
     );
   }, []);
   useEffect(() => {
-    if (leaveExplorationRequest !== undefined) leaveExploration();
+    if (leaveExplorationRequest !== undefined) {
+      leaveExploration();
+      setAccountRelationRoot(undefined);
+    }
   }, [leaveExplorationRequest, leaveExploration]);
   const exploring = exploration !== undefined;
   useEffect(() => {
@@ -1415,6 +1438,23 @@ export function GraphExplore({
       view,
     ],
   );
+  const accountRelationRoles = useMemo(
+    () =>
+      localCriteria.edgeKinds?.filter((kind) =>
+        accountRecordEdgeKinds.includes(kind),
+      ),
+    [localCriteria.edgeKinds],
+  );
+  const accountRelationQuery = useAccountRelations(
+    accountRelationRoot?.id,
+    recordFilter,
+    accountRelationRoles,
+    selectedAccountRelation,
+    matchConditions,
+    dataVersion,
+  );
+  const accountRelations =
+    accountRelationRoot === undefined ? undefined : accountRelationQuery.state;
   const [selected, setSelected] = useState<SelectedPoint | undefined>(
     undefined,
   );
@@ -1626,10 +1666,13 @@ export function GraphExplore({
       restoredSelectionId.current = undefined;
       return;
     }
-    if (!state.value.nodes.some((node) => node.id === selected.id)) {
+    if (
+      accountRelationRoot === undefined &&
+      !state.value.nodes.some((node) => node.id === selected.id)
+    ) {
       setSelected(undefined);
     }
-  }, [state, selected, influence]);
+  }, [state, selected, influence, accountRelationRoot]);
 
   // **setter だけを呼び、描画をまたいで同じ関数を保つ。** ノードの一覧は memo であり、
   // 関数が変わると関係を選ぶたびに全行を描き直す。
@@ -1655,6 +1698,7 @@ export function GraphExplore({
   // **検索の条件を変えたら、探索の表示を抜ける。** 分析者は条件を足した結果を見るために
   // 条件を変える。
   const changeSearchTerms = (terms: SearchTerms) => {
+    setAccountRelationRoot(undefined);
     leaveExploration();
     onChangeSearchTerms(terms);
   };
@@ -1712,6 +1756,20 @@ export function GraphExplore({
     },
     [setExploration],
   );
+  const showAccountRecords = useCallback(
+    (node: NodeRef) => {
+      setLocalCriteria((current) => ({
+        ...current,
+        edgeKinds: accountRecordEdgeKinds,
+      }));
+      leaveExploration();
+      setAccountRelationRoot(node);
+      setSelectedAccountRelation(undefined);
+      setSelected({ kind: "node", id: node.id });
+      onShowAccountRecords?.(node);
+    },
+    [onShowAccountRecords, leaveExploration],
+  );
   // 外から足す文字列は、欄の指定を外す。別の欄から拾った値を、今の欄だけで判定しない。
   const addTerm = useCallback(
     (kind: SearchTermKind, text: string) => {
@@ -1765,7 +1823,8 @@ export function GraphExplore({
     onNarrowToTerminal: narrowToTerminal,
     onTraceLineage: traceLineage,
     onShowNeighbours: showNeighbours,
-    onShowAccountRecords,
+    onShowAccountRecords:
+      onShowAccountRecords === undefined ? undefined : showAccountRecords,
     // 関係先を出している間だけ、起点に足す操作を出す。起点にあるノードと、起点が上限に
     // 達した後には出さない。
     onAddNeighbours:
@@ -1919,91 +1978,116 @@ export function GraphExplore({
 
   const graphPane = (
     <section aria-label="グラフ" className="pane-graph">
-      <div className="pane-head">
-        <DrawLimitSelect value={drawLimit} onChange={changeDrawLimit} />
-        <div className="ml-auto">
-          <LayoutSettingsPopover
-            value={layoutSettings}
-            onChange={setLayoutSettings}
-          />
-        </div>
-      </div>
-      {influence !== undefined && pathState !== undefined ? (
+      {accountRelations !== undefined ? (
         <>
           <div className="figure-bar">
-            <ul className="value-pairs">
-              <InfluenceEndsPairs ends={influence} />
-            </ul>
+            <span>相手アカウントの関係</span>
             <IconButton
-              label="経路の表示を終了"
-              onPress={() => setInfluence(undefined)}
+              label="相手アカウントの表示を終了"
+              onPress={() => setAccountRelationRoot(undefined)}
             >
               <X size={14} aria-hidden="true" />
             </IconButton>
           </div>
-          <InfluencePathFigure
-            state={pathState}
-            settings={layoutSettings}
-            selectedKey={pathSelectedKey}
-            onSelectVertex={selectPathVertex}
-          />
+          <div className="figure">
+            <AccountRelationsFigure
+              state={accountRelations}
+              selected={selectedAccountRelation}
+            />
+          </div>
         </>
       ) : (
         <>
-          {/* **読み込み中と失敗の通知は結果の欄だけが出す。** 同じ取得の通知を 2 か所に
-            出すと、読み上げが同じ失敗を 2 回読む。 */}
-          <div className="figure">
-            {withheld !== undefined ? (
-              <WithheldFigure
-                response={withheld}
-                onChangeDrawLimit={changeDrawLimit}
-                onShowNodes={
-                  onShowPane === undefined
-                    ? undefined
-                    : () => onShowPane("nodes")
-                }
-              >
-                {highlightPairs}
-              </WithheldFigure>
-            ) : shownState.status === "loaded" ? (
-              <SubgraphFigurePane
-                response={shownState.value}
-                settings={layoutSettings}
-                selectedId={shownSelectedId}
-                legendItems={highlightPairs}
-                onSelectNode={selectNode}
-                onSelectEdge={selectEdgeInFigure}
-                onAddOrigin={addOriginById}
-                highlight={shownHighlight}
-                backdrop={
-                  exploration?.kind === "neighbours" &&
-                  exploration.showOnly === true
-                    ? undefined
-                    : shownBackdrop
-                }
-                selectedEdgeId={selectedEdgeId}
-                nodeMenuActions={nodeMenuActions}
-                edgeMenuActions={edgeMenuActions}
-                emphasizesResponse={
-                  exploration?.kind !== "neighbours" ||
-                  exploration.keepsSearch !== true
-                }
+          <div className="pane-head">
+            <DrawLimitSelect value={drawLimit} onChange={changeDrawLimit} />
+            <div className="ml-auto">
+              <LayoutSettingsPopover
+                value={layoutSettings}
+                onChange={setLayoutSettings}
               />
-            ) : (
-              <p className="figure-placeholder">
-                {state.status === "loading" ? (
-                  <StatusLabel status="running" label="グラフの読み込み中" />
-                ) : (
-                  <StatusLabel
-                    status="failed"
-                    label="描画なし"
-                    details="理由: Search の結果"
-                  />
-                )}
-              </p>
-            )}
+            </div>
           </div>
-          {highlightNotice}
+          {influence !== undefined && pathState !== undefined ? (
+            <>
+              <div className="figure-bar">
+                <ul className="value-pairs">
+                  <InfluenceEndsPairs ends={influence} />
+                </ul>
+                <IconButton
+                  label="経路の表示を終了"
+                  onPress={() => setInfluence(undefined)}
+                >
+                  <X size={14} aria-hidden="true" />
+                </IconButton>
+              </div>
+              <InfluencePathFigure
+                state={pathState}
+                settings={layoutSettings}
+                selectedKey={pathSelectedKey}
+                onSelectVertex={selectPathVertex}
+              />
+            </>
+          ) : (
+            <>
+              {/* **読み込み中と失敗の通知は結果の欄だけが出す。** 同じ取得の通知を 2 か所に
+            出すと、読み上げが同じ失敗を 2 回読む。 */}
+              <div className="figure">
+                {withheld !== undefined ? (
+                  <WithheldFigure
+                    response={withheld}
+                    onChangeDrawLimit={changeDrawLimit}
+                    onShowNodes={
+                      onShowPane === undefined
+                        ? undefined
+                        : () => onShowPane("nodes")
+                    }
+                  >
+                    {highlightPairs}
+                  </WithheldFigure>
+                ) : shownState.status === "loaded" ? (
+                  <SubgraphFigurePane
+                    response={shownState.value}
+                    settings={layoutSettings}
+                    selectedId={shownSelectedId}
+                    legendItems={highlightPairs}
+                    onSelectNode={selectNode}
+                    onSelectEdge={selectEdgeInFigure}
+                    onAddOrigin={addOriginById}
+                    highlight={shownHighlight}
+                    backdrop={
+                      exploration?.kind === "neighbours" &&
+                      exploration.showOnly === true
+                        ? undefined
+                        : shownBackdrop
+                    }
+                    selectedEdgeId={selectedEdgeId}
+                    nodeMenuActions={nodeMenuActions}
+                    edgeMenuActions={edgeMenuActions}
+                    emphasizesResponse={
+                      exploration?.kind !== "neighbours" ||
+                      exploration.keepsSearch !== true
+                    }
+                  />
+                ) : (
+                  <p className="figure-placeholder">
+                    {state.status === "loading" ? (
+                      <StatusLabel
+                        status="running"
+                        label="グラフの読み込み中"
+                      />
+                    ) : (
+                      <StatusLabel
+                        status="failed"
+                        label="描画なし"
+                        details="理由: Search の結果"
+                      />
+                    )}
+                  </p>
+                )}
+              </div>
+              {highlightNotice}
+            </>
+          )}
         </>
       )}
     </section>
@@ -2144,6 +2228,19 @@ export function GraphExplore({
           )}
           actions={actions}
         />
+        {accountRelations === undefined ? null : (
+          <AccountRelationsDetail
+            state={accountRelations}
+            selected={selectedAccountRelation}
+            onSelect={setSelectedAccountRelation}
+            onSelectRecord={onSelectRecord}
+            onSelectNode={selectNode}
+            onLoadMore={accountRelationQuery.loadMore}
+            loadingMore={accountRelationQuery.loadingMore}
+            moreFailure={accountRelationQuery.moreFailure}
+            sourceFileNames={sourceFileNames}
+          />
+        )}
         <MergedAccountSection
           enabled={mergeSameAccount}
           node={detail.status === "loaded" ? detail.value.node : undefined}

@@ -286,7 +286,7 @@ func TestTimelineKeepsTheRecordsThatSatisfyTheExpression(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			timeline := graph.Timeline(TimelineQuery{Expression: expression})
+			timeline := graph.Timeline(TimelineQuery{TextSearch: GraphQuery{Expression: expression}})
 			var lines []int64
 			for _, entry := range timeline.Entries {
 				lines = append(lines, *entry.RecordRef.LineNumber)

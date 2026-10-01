@@ -509,6 +509,64 @@ function accountNode() {
   };
 }
 
+/** アカウントと、それを役割付きで指す 1 件のレコードを含む部分グラフ。 */
+export function accountRecordGraphResponseJson() {
+  const response = graphResponseJson();
+  const roles = [
+    "record_subject_account",
+    "record_target_account",
+    "record_names_object",
+  ] as const;
+  return {
+    ...response,
+    nodes: [{ ...accountNode(), selection: "matched" }, recordNode("matched")],
+    nodeCount: 2,
+    matchedKinds: [
+      { kind: "account", count: 1 },
+      { kind: "record", count: 1 },
+    ],
+    subgraphNodeCount: 2,
+    edges: roles.map((kind, index) => ({
+      id: `e:${kind}:synthetic-${index}`,
+      kind,
+      state: "observed",
+      sourceNodeId: recordNodeId,
+      targetNodeId: accountNodeId,
+      evidenceCount: 1,
+    })),
+    edgeCount: roles.length,
+    depth: 1,
+  };
+}
+
+/** 3 種の役割付きエッジを持つアカウントノードの詳細。 */
+export function accountNodeDetailResponseJson() {
+  const response = nodeDetailResponseJson();
+  return {
+    ...response,
+    node: {
+      ...accountNode(),
+      creationRecord: "item_absent",
+    },
+    attributes: [],
+    attributeCount: 0,
+    evidence: [],
+    evidenceCount: 0,
+    edgeCounts: [
+      "record_subject_account",
+      "record_target_account",
+      "record_names_object",
+    ].map((edgeKind) => ({
+      edgeKind,
+      direction: "incoming",
+      edgeCount: 1,
+      evidenceCount: 1,
+    })),
+    creationRecords: [],
+    creationRecordCount: 0,
+  };
+}
+
 export function remoteSessionObservationKind(category: string, action: string) {
   return {
     raw: [

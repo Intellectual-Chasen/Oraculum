@@ -445,7 +445,7 @@ export type RecordSummary = {
 };
 
 /** `RecordSummary` を検証する。 */
-const decodeRecordSummary: Decoder<RecordSummary> = (input, path) => {
+export const decodeRecordSummary: Decoder<RecordSummary> = (input, path) => {
   const source = readObject(input, path);
   return {
     recordRef: requireMember(source, "recordRef", path, decodeRecordLocator),

@@ -1454,6 +1454,21 @@ export function App({
           accountHistory === undefined ? recordFilter.terminal?.id : undefined
         }
         sources={accountHistory === undefined ? timelineSources : undefined}
+        valueContains={
+          accountHistory === undefined ? searchTerms.contains : undefined
+        }
+        valueExcludes={
+          accountHistory === undefined ? searchTerms.excludes : undefined
+        }
+        valueField={
+          accountHistory === undefined ? searchTerms.field : undefined
+        }
+        fieldContains={
+          accountHistory === undefined ? searchTerms.fieldContains : undefined
+        }
+        fieldEquals={
+          accountHistory === undefined ? searchTerms.fieldEquals : undefined
+        }
         searchExpression={
           accountHistory === undefined ? searchTerms.expression : undefined
         }

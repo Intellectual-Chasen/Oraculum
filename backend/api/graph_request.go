@@ -62,11 +62,8 @@ type graphRequest struct {
 	// addressIn と addressNotIn は検索の条件から読んだアドレスの範囲である。
 	addressIn    *netip.Prefix
 	addressNotIn *netip.Prefix
-	// fieldTerms は検索の条件の欄と文字列の組を読んだ値である。部分一致の組の後ろに完全一致の組が
-	// 並び、どちらも条件に書いた順に並ぶ。
-	fieldTerms []pipeline.FieldTerm
-	// searchExpression は検索の条件の検索式を読んだ値である。式を持たない条件では nil である。
-	searchExpression *pipeline.SearchExpression
+	// textSearch は値・欄・検索式に対する文字列条件である。
+	textSearch pipeline.GraphQuery
 	// recordSummary は、合致したレコードのノードに位置と時刻と事象の種別を添えるかである。
 	recordSummary bool
 }
@@ -78,17 +75,17 @@ func (r graphRequest) query() pipeline.GraphQuery {
 		NodeKinds: r.search.NodeKinds, Granularity: r.search.Granularity,
 		NodeIds: r.search.NodeIds, Depth: r.search.Depth, EdgeKinds: r.search.EdgeKinds,
 		AddressInPrefix: r.addressIn, AddressNotInPrefix: r.addressNotIn,
-		ValueContains: r.search.ValueContains, ValueExcludes: r.search.ValueExcludes,
-		FieldContains:           r.fieldTerms,
-		Expression:              r.searchExpression,
 		RecordFilter:            r.records.recordFilter(),
 		ConditionsOnOriginsOnly: r.search.ConditionsOnOriginsOnly,
 		EndpointRecordsInPeriod: r.search.EndpointRecordsInPeriod,
 		RecordSummary:           r.recordSummary,
 	}
-	if r.search.ValueField != "" {
-		built.ValueFieldSemantic, built.ValueFieldName = pipeline.DesignatedField(r.search.ValueField)
-	}
+	built.ValueContains = r.textSearch.ValueContains
+	built.ValueExcludes = r.textSearch.ValueExcludes
+	built.ValueFieldSemantic = r.textSearch.ValueFieldSemantic
+	built.ValueFieldName = r.textSearch.ValueFieldName
+	built.FieldContains = r.textSearch.FieldContains
+	built.Expression = r.textSearch.Expression
 	if r.search.CountBy != "" {
 		built.CountBySemantic, built.CountByName = pipeline.DesignatedField(r.search.CountBy)
 	}
@@ -154,7 +151,30 @@ func newGraphRequest(search core.SearchQuery) (graphRequest, error) {
 	if err != nil {
 		return graphRequest{}, err
 	}
-	request := graphRequest{search: search, records: records, addressIn: in, addressNotIn: notIn}
+	var expression *pipeline.SearchExpression
+	if search.SearchExpression != "" {
+		parsed, err := pipeline.ParseSearchExpression(search.SearchExpression)
+		if err != nil {
+			return graphRequest{}, err
+		}
+		expression = parsed
+	}
+	request := graphRequest{
+		search: search, records: records, addressIn: in, addressNotIn: notIn,
+		textSearch: textSearchOf(search, expression),
+	}
+	return request, nil
+}
+
+// textSearchOf は、検証済みの検索条件から値・欄の文字列条件を pipeline の要求へ移す。
+func textSearchOf(search core.SearchQuery, expression *pipeline.SearchExpression) pipeline.GraphQuery {
+	textSearch := pipeline.GraphQuery{
+		ValueContains: search.ValueContains, ValueExcludes: search.ValueExcludes,
+		Expression: expression,
+	}
+	if search.ValueField != "" {
+		textSearch.ValueFieldSemantic, textSearch.ValueFieldName = pipeline.DesignatedField(search.ValueField)
+	}
 	for _, pairs := range []struct {
 		values     []string
 		wholeValue bool
@@ -166,19 +186,21 @@ func newGraphRequest(search core.SearchQuery) (graphRequest, error) {
 			// 組の形は Validate が確かめた。最初の `=` で欄と文字列を分ける。
 			field, contains, _ := strings.Cut(pair, "=")
 			semantic, name := pipeline.DesignatedField(field)
-			request.fieldTerms = append(request.fieldTerms, pipeline.FieldTerm{
+			textSearch.FieldContains = append(textSearch.FieldContains, pipeline.FieldTerm{
 				Semantic: semantic, Name: name, Contains: contains, WholeValue: pairs.wholeValue,
 			})
 		}
 	}
-	if search.SearchExpression != "" {
-		expression, err := pipeline.ParseSearchExpression(search.SearchExpression)
-		if err != nil {
-			return graphRequest{}, err
-		}
-		request.searchExpression = expression
+	return textSearch
+}
+
+// readTextSearchQuery は、値・欄に対する文字列条件を query から読む。
+func readTextSearchQuery(query url.Values) core.SearchQuery {
+	return core.SearchQuery{
+		ValueContains: query[valueContainsParam], ValueExcludes: query[valueExcludesParam],
+		ValueField:    query.Get(valueFieldParam),
+		FieldContains: query[fieldContainsParam], FieldEquals: query[fieldEqualsParam],
 	}
-	return request, nil
 }
 
 // readGraphFlags は、唯一の文字列 true だけを取る項目を読む。与えた項目の名前に真を持つ。
@@ -203,20 +225,14 @@ func readSearchQuery(query url.Values) (core.SearchQuery, error) {
 	if err != nil {
 		return core.SearchQuery{}, err
 	}
-	search := core.SearchQuery{
-		Granularity:      core.GraphGranularity(query.Get(granularityParam)),
-		NodeIds:          query[nodeIdParam],
-		ValueContains:    query[valueContainsParam],
-		ValueExcludes:    query[valueExcludesParam],
-		ValueField:       query.Get(valueFieldParam),
-		FieldContains:    query[fieldContainsParam],
-		FieldEquals:      query[fieldEqualsParam],
-		SearchExpression: query.Get(searchExpressionParam),
-		CountBy:          query.Get(countByParam),
-		AddressInCidr:    query.Get(addressInCidrParam),
-		AddressNotInCidr: query.Get(addressNotInCidrParam),
-		RecordConditions: records,
-	}
+	search := readTextSearchQuery(query)
+	search.Granularity = core.GraphGranularity(query.Get(granularityParam))
+	search.NodeIds = query[nodeIdParam]
+	search.SearchExpression = query.Get(searchExpressionParam)
+	search.CountBy = query.Get(countByParam)
+	search.AddressInCidr = query.Get(addressInCidrParam)
+	search.AddressNotInCidr = query.Get(addressNotInCidrParam)
+	search.RecordConditions = records
 	for _, kind := range query[nodeKindParam] {
 		search.NodeKinds = append(search.NodeKinds, core.NodeKind(kind))
 	}
@@ -319,7 +335,11 @@ func checkGraphEmptyValues(query url.Values) error {
 			return errors.New(name + " must not be empty")
 		}
 	}
-	// 文字列を伴わない欄の指定と同じく、空の欄の指定は通知なしに作用しない条件になる。
+	return checkTextSearchEmptyValues(query)
+}
+
+// checkTextSearchEmptyValues は文字列を伴わない欄指定と空の欄名を退ける。
+func checkTextSearchEmptyValues(query url.Values) error {
 	if _, given := query[valueFieldParam]; given && query.Get(valueFieldParam) == "" {
 		return errors.New(valueFieldParam + " must name a field and come with a search term")
 	}
